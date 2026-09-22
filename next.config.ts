@@ -1,7 +1,23 @@
 import type { NextConfig } from "next";
 
+/**
+ * The store is deployed as a fully static site on GitHub Pages, served from
+ * https://brunoicosta.github.io/next-ecommerce-store/. Static export means no
+ * server runtime: no Server Actions, no dynamic Route Handlers and no image
+ * optimizer. Everything dynamic (cart, checkout, filters) runs on the client.
+ */
+const basePath = "/next-ecommerce-store";
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",
+  basePath,
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
 };
 
 export default nextConfig;
