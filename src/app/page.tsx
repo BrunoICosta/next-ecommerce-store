@@ -1,25 +1,41 @@
-import { ProductArt } from "@/features/catalog/components/product-art";
-import { getAllProducts } from "@/features/catalog";
+import { getBestSellers, getNewArrivals } from "@/features/catalog";
+import { ProductGrid } from "@/features/catalog/components/product-grid";
+import { FeaturedCategories } from "@/features/home/featured-categories";
+import { Hero } from "@/features/home/hero";
+import { SectionHeading } from "@/features/home/section-heading";
+import { ValueProps } from "@/features/home/value-props";
+import { routes } from "@/lib/routes";
 
+/** Home is a Server Component: rendered once at build time, zero client JS of its own. */
 export default function HomePage() {
-  const products = getAllProducts();
+  const bestSellers = getBestSellers(8);
+  const newArrivals = getNewArrivals(4);
+
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-3xl font-semibold tracking-tight">Loja em construção</h1>
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {products.map((product, index) => (
-          <li key={product.id} className="overflow-hidden rounded-xl">
-            <ProductArt
-              category={product.category}
-              color={product.colors[0]}
-              view={(index % 3) as 0 | 1 | 2}
-              label={product.name}
-              className="aspect-[4/5] w-full"
-            />
-            <p className="mt-2 text-sm">{product.name}</p>
-          </li>
-        ))}
-      </ul>
+    <main className="flex flex-col gap-16 pb-8 sm:gap-20">
+      <Hero />
+      <ValueProps />
+      <FeaturedCategories />
+
+      <section aria-labelledby="mais-vendidos" className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <SectionHeading
+          id="mais-vendidos"
+          eyebrow="Os favoritos"
+          title="Mais vendidos"
+          action={{ href: routes.products("ordem=mais-vendidos"), label: "Ver todos" }}
+        />
+        <ProductGrid products={bestSellers} className="mt-8" />
+      </section>
+
+      <section aria-labelledby="novidades" className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <SectionHeading
+          id="novidades"
+          eyebrow="Acabou de chegar"
+          title="Novidades"
+          action={{ href: routes.products("ordem=novidades"), label: "Ver novidades" }}
+        />
+        <ProductGrid products={newArrivals} className="mt-8" />
+      </section>
     </main>
   );
 }

@@ -173,6 +173,7 @@ interface ProductArtProps {
   color: ColorId;
   /** 0 = front, 1 = close-up detail, 2 = lifestyle composition. */
   view?: ArtView;
+  /** Accessible description. Pass an empty string for purely decorative usage. */
   label: string;
   className?: string;
 }
@@ -195,8 +196,7 @@ export function ProductArt({ category, color, view = 0, label, className }: Prod
   return (
     <svg
       viewBox="0 0 400 500"
-      role="img"
-      aria-label={label}
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       className={className}
       preserveAspectRatio="xMidYMid slice"
     >
