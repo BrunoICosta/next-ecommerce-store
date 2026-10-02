@@ -1,17 +1,18 @@
 import { cn } from "@/lib/cn";
 
 import { getNewArrivals } from "../queries";
-import type { Product } from "../types";
+import type { ColorId, Product } from "../types";
 import { ProductCard } from "./product-card";
 
 const newArrivalIds = new Set(getNewArrivals(6).map((product) => product.id));
 
 interface ProductGridProps {
   products: Product[];
+  preferredColors?: ColorId[];
   className?: string;
 }
 
-export function ProductGrid({ products, className }: ProductGridProps) {
+export function ProductGrid({ products, preferredColors, className }: ProductGridProps) {
   return (
     <ul
       className={cn(
@@ -21,7 +22,11 @@ export function ProductGrid({ products, className }: ProductGridProps) {
     >
       {products.map((product) => (
         <li key={product.id}>
-          <ProductCard product={product} isNew={newArrivalIds.has(product.id)} />
+          <ProductCard
+            product={product}
+            isNew={newArrivalIds.has(product.id)}
+            preferredColors={preferredColors}
+          />
         </li>
       ))}
     </ul>

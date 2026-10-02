@@ -7,16 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
 import { pluralize } from "@/lib/format";
 
-import {
-  countActiveFilters,
-  DEFAULT_FILTERS,
-  filterProducts,
-  SORT_OPTIONS,
-  type CatalogFilters,
-  type SortOption,
-} from "../filters";
+import { countActiveFilters, filterProducts, SORT_OPTIONS, type SortOption } from "../filters";
+import { useCatalogFilters } from "../hooks/use-catalog-filters";
 import { getAllProducts, getCategoryCounts } from "../queries";
 import { ActiveFilters } from "./active-filters";
+import { CatalogSearch } from "./catalog-search";
 import { FilterPanel } from "./filter-panel";
 import { ProductGrid } from "./product-grid";
 
@@ -24,12 +19,8 @@ const allProducts = getAllProducts();
 const categoryCounts = getCategoryCounts();
 
 export function CatalogView() {
-  const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
+  const { filters, updateFilters, clearFilters } = useCatalogFilters();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  const updateFilters = (patch: Partial<CatalogFilters>) =>
-    setFilters((current) => ({ ...current, ...patch }));
-  const clearFilters = () => setFilters({ ...DEFAULT_FILTERS, sort: filters.sort });
 
   const deferredFilters = useDeferredValue(filters);
   const results = useMemo(() => filterProducts(allProducts, deferredFilters), [deferredFilters]);
@@ -47,9 +38,7 @@ export function CatalogView() {
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground" aria-live="polite">
-            {pluralize(results.length, "produto encontrado", "produtos encontrados")}
-          </p>
+          <CatalogSearch value={filters.query} onChange={(query) => updateFilters({ query })} />
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -61,7 +50,7 @@ export function CatalogView() {
               Filtros{activeCount > 0 && ` (${activeCount})`}
             </Button>
             <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Ordenar por</span>
+              <span className="sr-only text-muted-foreground sm:not-sr-only">Ordenar por</span>
               <select
                 value={filters.sort}
                 onChange={(event) => updateFilters({ sort: event.target.value as SortOption })}
@@ -77,12 +66,15 @@ export function CatalogView() {
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {pluralize(results.length, "produto encontrado", "produtos encontrados")}
+          </p>
           <ActiveFilters filters={filters} onChange={updateFilters} onClear={clearFilters} />
         </div>
 
         {results.length > 0 ? (
-          <ProductGrid products={results} className="mt-6" />
+          <ProductGrid products={results} preferredColors={filters.colors} className="mt-6" />
         ) : (
           <div className="mt-10 flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-16 text-center">
             <SearchX className="size-10 text-muted-foreground" aria-hidden />

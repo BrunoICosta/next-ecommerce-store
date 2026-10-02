@@ -7,24 +7,28 @@ import { routes } from "@/lib/routes";
 
 import { getColor } from "../data/colors";
 import { getDiscountPercent } from "../queries";
-import type { Product } from "../types";
+import type { ColorId, Product } from "../types";
 import { ProductArt } from "./product-art";
 
 interface ProductCardProps {
   product: Product;
   isNew?: boolean;
+  /** When the shopper filters by color, show the product in that color. */
+  preferredColors?: ColorId[];
 }
 
-export function ProductCard({ product, isNew = false }: ProductCardProps) {
+export function ProductCard({ product, isNew = false, preferredColors = [] }: ProductCardProps) {
   const discount = getDiscountPercent(product);
+  const coverColor =
+    product.colors.find((color) => preferredColors.includes(color)) ?? product.colors[0];
 
   return (
     <article className="group relative flex h-full flex-col">
       <div className="relative overflow-hidden rounded-2xl bg-muted">
         <ProductArt
           category={product.category}
-          color={product.colors[0]}
-          label={`${product.name} na cor ${getColor(product.colors[0]).name}`}
+          color={coverColor}
+          label={`${product.name} na cor ${getColor(coverColor).name}`}
           className="aspect-[4/5] w-full transition duration-500 group-hover:scale-[1.03]"
         />
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
