@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { SiteFooter } from "@/components/layout/site-footer";
+import { StoreHydration } from "@/components/providers/store-hydration";
+import { CartDrawer } from "@/features/cart/components/cart-drawer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { siteConfig } from "@/lib/site";
 import { themeInitScript } from "@/lib/theme";
@@ -55,6 +57,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </div>
         <SiteFooter />
+        <CartDrawer />
+        <StoreHydration />
       </body>
     </html>
   );

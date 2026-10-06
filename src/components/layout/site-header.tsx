@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { CartButton } from "@/features/cart/components/cart-button";
+
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 import { navLinks } from "./nav-links";
@@ -32,6 +34,7 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-1">
           <SearchForm className="mr-2 hidden w-56 lg:block xl:w-72" />
           <ThemeToggle />
+          <CartButton />
         </div>
       </div>
     </header>

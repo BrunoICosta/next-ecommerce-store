@@ -1,12 +1,14 @@
 "use client";
 
-import { RefreshCcw, Truck } from "lucide-react";
+import { RefreshCcw, ShoppingBag, Truck } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui/price";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { Rating } from "@/components/ui/rating";
+import { useCartStore } from "@/features/cart/store";
 import type { ColorId, Product, Size } from "@/features/catalog";
 import { getCategory, getDiscountPercent } from "@/features/catalog";
 import { formatInstallments } from "@/lib/format";
@@ -24,7 +26,25 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     product.sizes.length === 1 ? product.sizes[0] : null,
   );
   const [quantity, setQuantity] = useState(1);
+  const [sizeError, setSizeError] = useState<string | undefined>();
+  const addItem = useCartStore((state) => state.addItem);
+  const openDrawer = useCartStore((state) => state.openDrawer);
   const discount = getDiscountPercent(product);
+
+  function handleSizeChange(next: Size) {
+    setSize(next);
+    setSizeError(undefined);
+  }
+
+  function handleAddToCart() {
+    if (!size) {
+      setSizeError("Selecione um tamanho para continuar.");
+      return;
+    }
+    addItem({ productId: product.id, color, size, quantity });
+    setQuantity(1);
+    openDrawer();
+  }
 
   return (
     <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
@@ -53,10 +73,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         <ColorSelector colors={product.colors} value={color} onChange={setColor} />
-        <SizeSelector sizes={product.sizes} value={size} onChange={setSize} />
+        <SizeSelector
+          sizes={product.sizes}
+          value={size}
+          onChange={handleSizeChange}
+          error={sizeError}
+        />
 
         <div className="flex flex-wrap items-center gap-3">
           <QuantityStepper value={quantity} onChange={setQuantity} />
+          <Button size="lg" className="flex-1" onClick={handleAddToCart}>
+            <ShoppingBag className="size-5" aria-hidden />
+            Adicionar ao carrinho
+          </Button>
         </div>
 
         <ul className="grid gap-3 rounded-2xl border border-border p-4 text-sm sm:grid-cols-2">
