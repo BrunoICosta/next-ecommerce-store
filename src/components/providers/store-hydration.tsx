@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 
 import { useCartStore } from "@/features/cart/store";
+import { useWishlistStore } from "@/features/wishlist/store";
 
-const persistedStores = [useCartStore];
+const persistedStores = [useCartStore, useWishlistStore];
 
 /**
  * Persisted stores use `skipHydration`, so the static HTML always matches the

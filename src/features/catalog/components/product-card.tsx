@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Price } from "@/components/ui/price";
 import { Rating } from "@/components/ui/rating";
+import { WishlistButton } from "@/features/wishlist/components/wishlist-button";
 import { routes } from "@/lib/routes";
 
 import { getColor } from "../data/colors";
@@ -35,6 +36,11 @@ export function ProductCard({ product, isNew = false, preferredColors = [] }: Pr
           {discount > 0 && <Badge tone="accent">-{discount}%</Badge>}
           {isNew && <Badge>Novo</Badge>}
         </div>
+        <WishlistButton
+          productId={product.id}
+          productName={product.name}
+          className="absolute top-3 right-3 z-10"
+        />
       </div>
       <div className="mt-3 flex flex-1 flex-col gap-1">
         <h3 className="leading-snug font-medium">

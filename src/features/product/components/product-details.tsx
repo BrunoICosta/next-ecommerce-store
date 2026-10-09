@@ -9,6 +9,7 @@ import { Price } from "@/components/ui/price";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { Rating } from "@/components/ui/rating";
 import { useCartStore } from "@/features/cart/store";
+import { WishlistButton } from "@/features/wishlist/components/wishlist-button";
 import type { ColorId, Product, Size } from "@/features/catalog";
 import { getCategory, getDiscountPercent } from "@/features/catalog";
 import { formatInstallments } from "@/lib/format";
@@ -86,6 +87,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <ShoppingBag className="size-5" aria-hidden />
             Adicionar ao carrinho
           </Button>
+          <WishlistButton productId={product.id} productName={product.name} variant="full" />
         </div>
 
         <ul className="grid gap-3 rounded-2xl border border-border p-4 text-sm sm:grid-cols-2">
