@@ -42,7 +42,9 @@ export const addressSchema = z.object({
   complement: z.string().trim().max(60, "Complemento muito longo.").optional(),
   neighborhood: z.string().trim().min(1, required("o bairro")),
   city: z.string().trim().min(1, required("a cidade")),
-  state: z.string().refine(isBrazilianState, "Selecione o estado."),
+  state: z
+    .string()
+    .refine((value) => BRAZILIAN_STATES.some((uf) => uf === value), "Selecione o estado."),
   shippingMethod: z.enum(["pac", "sedex"]),
 });
 

@@ -7,6 +7,7 @@ import { useCart, useCartHydrated } from "@/features/cart/hooks";
 import { routes } from "@/lib/routes";
 
 import { useCheckoutHydrated, useCheckoutStore } from "../store";
+import { AddressStep } from "./address-step";
 import { CheckoutStepper } from "./checkout-stepper";
 import { CheckoutSummary } from "./checkout-summary";
 import { CustomerStep } from "./customer-step";
@@ -26,7 +27,9 @@ export function CheckoutView() {
   const { lines, totals } = useCart();
   const step = useCheckoutStore((state) => state.step);
   const customer = useCheckoutStore((state) => state.customer);
+  const address = useCheckoutStore((state) => state.address);
   const saveCustomer = useCheckoutStore((state) => state.saveCustomer);
+  const saveAddress = useCheckoutStore((state) => state.saveAddress);
   const goToStep = useCheckoutStore((state) => state.goToStep);
 
   if (!cartHydrated || !checkoutHydrated) return <CheckoutSkeleton />;
@@ -50,7 +53,15 @@ export function CheckoutView() {
         <CheckoutStepper current={step} onSelect={goToStep} />
         <div className="rounded-3xl border border-border bg-card p-5 sm:p-8">
           {step === 1 && <CustomerStep defaultValues={customer} onSubmit={saveCustomer} />}
-          {step > 1 && <p className="text-muted-foreground">Próximas etapas em desenvolvimento.</p>}
+          {step === 2 && (
+            <AddressStep
+              defaultValues={address}
+              merchandiseTotal={totals.subtotal - totals.discount}
+              onBack={() => goToStep(1)}
+              onSubmit={saveAddress}
+            />
+          )}
+          {step === 3 && <p className="text-muted-foreground">Pagamento em desenvolvimento.</p>}
         </div>
       </div>
       <div className="lg:sticky lg:top-32">
