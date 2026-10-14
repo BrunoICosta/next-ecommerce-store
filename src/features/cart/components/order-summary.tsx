@@ -27,7 +27,8 @@ export function OrderSummary({
   children,
   title = "Resumo do pedido",
 }: OrderSummaryProps) {
-  const total = totals.total - paymentDiscount;
+  // Computed from the parts so cart, checkout and order snapshots render the same way.
+  const total = totals.subtotal - totals.discount + (totals.shipping ?? 0) - paymentDiscount;
 
   return (
     <section

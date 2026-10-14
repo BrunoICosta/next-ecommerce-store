@@ -1,16 +1,26 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { LoaderCircle, ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { useCart, useCartHydrated } from "@/features/cart/hooks";
+import { useCartStore } from "@/features/cart/store";
 import { routes } from "@/lib/routes";
 
-import { useCheckoutHydrated, useCheckoutStore } from "../store";
+import { calculatePaymentDiscount, createOrder } from "../order";
+import { useOrderStore } from "../order-store";
+import type { PaymentData, PaymentMethod } from "../schemas";
+import { useCheckoutHydrated, useCheckoutStore, type CheckoutStep } from "../store";
 import { AddressStep } from "./address-step";
 import { CheckoutStepper } from "./checkout-stepper";
 import { CheckoutSummary } from "./checkout-summary";
 import { CustomerStep } from "./customer-step";
+import { PaymentStep } from "./payment-step";
+
+/** Simulated gateway latency so the processing state is visible. */
+const PAYMENT_DELAY_MS = 1200;
 
 function CheckoutSkeleton() {
   return (
@@ -31,6 +41,51 @@ export function CheckoutView() {
   const saveCustomer = useCheckoutStore((state) => state.saveCustomer);
   const saveAddress = useCheckoutStore((state) => state.saveAddress);
   const goToStep = useCheckoutStore((state) => state.goToStep);
+  const resetCheckout = useCheckoutStore((state) => state.reset);
+  const clearCart = useCartStore((state) => state.clear);
+  const addOrder = useOrderStore((state) => state.addOrder);
+  const router = useRouter();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [redirecting, setRedirecting] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
+
+  // Never show a step whose prerequisites are missing (e.g. cleared session).
+  const currentStep: CheckoutStep = !customer ? 1 : !address && step === 3 ? 2 : step;
+
+  const previousStep = useRef(currentStep);
+  useEffect(() => {
+    if (previousStep.current === currentStep) return;
+    previousStep.current = currentStep;
+    topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [currentStep]);
+
+  const amountFor = useCallback(
+    (method: PaymentMethod) => totals.total - calculatePaymentDiscount(totals, method),
+    [totals],
+  );
+
+  async function placeOrder(payment: PaymentData) {
+    if (!customer || !address) return;
+    await new Promise((resolve) => setTimeout(resolve, PAYMENT_DELAY_MS));
+    const order = createOrder({ lines, totals, customer, address, payment });
+    addOrder(order);
+    setRedirecting(true);
+    router.push(routes.orderConfirmation);
+    clearCart();
+    resetCheckout();
+  }
+
+  if (redirecting) {
+    return (
+      <div
+        className="flex items-center justify-center gap-3 py-24 text-muted-foreground"
+        role="status"
+      >
+        <LoaderCircle className="size-5 animate-spin" aria-hidden />
+        Confirmando seu pedido…
+      </div>
+    );
+  }
 
   if (!cartHydrated || !checkoutHydrated) return <CheckoutSkeleton />;
 
@@ -48,12 +103,12 @@ export function CheckoutView() {
   }
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[1fr_400px]">
+    <div ref={topRef} className="grid scroll-mt-32 items-start gap-10 lg:grid-cols-[1fr_400px]">
       <div className="space-y-8">
-        <CheckoutStepper current={step} onSelect={goToStep} />
+        <CheckoutStepper current={currentStep} onSelect={goToStep} />
         <div className="rounded-3xl border border-border bg-card p-5 sm:p-8">
-          {step === 1 && <CustomerStep defaultValues={customer} onSubmit={saveCustomer} />}
-          {step === 2 && (
+          {currentStep === 1 && <CustomerStep defaultValues={customer} onSubmit={saveCustomer} />}
+          {currentStep === 2 && (
             <AddressStep
               defaultValues={address}
               merchandiseTotal={totals.subtotal - totals.discount}
@@ -61,11 +116,24 @@ export function CheckoutView() {
               onSubmit={saveAddress}
             />
           )}
-          {step === 3 && <p className="text-muted-foreground">Pagamento em desenvolvimento.</p>}
+          {currentStep === 3 && (
+            <PaymentStep
+              amountFor={amountFor}
+              onMethodChange={setPaymentMethod}
+              onBack={() => goToStep(2)}
+              onSubmit={placeOrder}
+            />
+          )}
         </div>
       </div>
       <div className="lg:sticky lg:top-32">
-        <CheckoutSummary lines={lines} totals={totals} />
+        <CheckoutSummary
+          lines={lines}
+          totals={totals}
+          paymentDiscount={
+            currentStep === 3 ? calculatePaymentDiscount(totals, paymentMethod) : undefined
+          }
+        />
       </div>
     </div>
   );
