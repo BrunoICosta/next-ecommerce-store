@@ -5,7 +5,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { StoreHydration } from "@/components/providers/store-hydration";
 import { CartDrawer } from "@/features/cart/components/cart-drawer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { siteConfig } from "@/lib/site";
+import { ogImage } from "@/features/seo/og-image";
+import { absoluteUrl, siteConfig } from "@/lib/site";
 import { themeInitScript } from "@/lib/theme";
 
 import "./globals.css";
@@ -21,11 +22,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(`${siteConfig.url}/`),
   title: {
     default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
+  authors: [{ name: siteConfig.author.name, url: siteConfig.author.url }],
+  keywords: ["loja online", "moda casual", "camisetas", "tênis", "moletons", "Next.js"],
+  openGraph: {
+    type: "website",
+    locale: siteConfig.locale,
+    siteName: siteConfig.name,
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [ogImage(absoluteUrl("/og.png"), siteConfig.title)],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [absoluteUrl("/og.png")],
+  },
 };
 
 export const viewport: Viewport = {

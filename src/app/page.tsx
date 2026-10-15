@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { getBestSellers, getNewArrivals } from "@/features/catalog";
 import { ProductGrid } from "@/features/catalog/components/product-grid";
 import { FeaturedCategories } from "@/features/home/featured-categories";
@@ -5,6 +7,11 @@ import { Hero } from "@/features/home/hero";
 import { SectionHeading } from "@/features/home/section-heading";
 import { ValueProps } from "@/features/home/value-props";
 import { routes } from "@/lib/routes";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: absoluteUrl("/") },
+};
 
 /** Home is a Server Component: rendered once at build time, zero client JS of its own. */
 export default function HomePage() {

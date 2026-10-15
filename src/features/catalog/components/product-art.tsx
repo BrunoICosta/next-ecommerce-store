@@ -176,6 +176,9 @@ interface ProductArtProps {
   /** Accessible description. Pass an empty string for purely decorative usage. */
   label: string;
   className?: string;
+  /** Explicit pixel size, needed when rendered outside the DOM (OG images). */
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -183,7 +186,15 @@ interface ProductArtProps {
  * so the demo has no external image dependency, ships no image requests and
  * re-tints instantly when the shopper picks another color.
  */
-export function ProductArt({ category, color, view = 0, label, className }: ProductArtProps) {
+export function ProductArt({
+  category,
+  color,
+  view = 0,
+  label,
+  className,
+  width,
+  height,
+}: ProductArtProps) {
   const { hex, shade } = getColor(color);
   const Silhouette = SILHOUETTES[category];
   const transform =
@@ -198,6 +209,8 @@ export function ProductArt({ category, color, view = 0, label, className }: Prod
       viewBox="0 0 400 500"
       {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       className={className}
+      width={width}
+      height={height}
       preserveAspectRatio="xMidYMid slice"
     >
       <rect width={400} height={500} fill={BACKGROUNDS[view]} />

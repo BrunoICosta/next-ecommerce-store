@@ -4,11 +4,14 @@ import { Suspense } from "react";
 import { getAllProducts } from "@/features/catalog";
 import { CatalogView } from "@/features/catalog/components/catalog-view";
 import { ProductGrid } from "@/features/catalog/components/product-grid";
+import { routes } from "@/lib/routes";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Todos os produtos",
   description:
     "Camisetas, moletons, calças, tênis, bonés e mochilas. Filtre por categoria, preço, cor, tamanho e avaliação.",
+  alternates: { canonical: absoluteUrl(routes.products()) },
 };
 
 /**
