@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import type { FormEvent, ReactNode } from "react";
+import { useId, type FormEvent, type ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 import { formatRating } from "@/lib/format";
@@ -40,6 +40,9 @@ function parsePrice(value: FormDataEntryValue | null): number | null {
 }
 
 export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelProps) {
+  // The panel renders twice (desktop sidebar + mobile sheet); radio groups need unique names.
+  const ratingGroup = useId();
+
   function handlePriceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -204,7 +207,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="radio"
-                  name="rating"
+                  name={ratingGroup}
                   checked={filters.minRating === rating}
                   onChange={() => onChange({ minRating: rating })}
                   className="size-4 accent-accent"

@@ -5,6 +5,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
+import { cn } from "@/lib/cn";
 import { pluralize } from "@/lib/format";
 
 import { countActiveFilters, filterProducts, SORT_OPTIONS, type SortOption } from "../filters";
@@ -19,7 +20,7 @@ const allProducts = getAllProducts();
 const categoryCounts = getCategoryCounts();
 
 export function CatalogView() {
-  const { filters, updateFilters, clearFilters } = useCatalogFilters();
+  const { filters, updateFilters, clearFilters, isPending } = useCatalogFilters();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const deferredFilters = useDeferredValue(filters);
@@ -74,7 +75,11 @@ export function CatalogView() {
         </div>
 
         {results.length > 0 ? (
-          <ProductGrid products={results} preferredColors={filters.colors} className="mt-6" />
+          <ProductGrid
+            products={results}
+            preferredColors={filters.colors}
+            className={cn("mt-6 transition-opacity", isPending && "opacity-70")}
+          />
         ) : (
           <div className="mt-10 flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-16 text-center">
             <SearchX className="size-10 text-muted-foreground" aria-hidden />
