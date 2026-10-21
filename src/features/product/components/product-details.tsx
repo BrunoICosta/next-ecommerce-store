@@ -81,13 +81,24 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           error={sizeError}
         />
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <QuantityStepper value={quantity} onChange={setQuantity} />
-          <Button size="lg" className="flex-1" onClick={handleAddToCart}>
-            <ShoppingBag className="size-5" aria-hidden />
-            Adicionar ao carrinho
+          <Button
+            size="lg"
+            className="min-w-0 flex-1 px-4 whitespace-nowrap"
+            onClick={handleAddToCart}
+            aria-label="Adicionar ao carrinho"
+          >
+            <ShoppingBag className="size-5 shrink-0" aria-hidden />
+            <span className="sm:hidden">Adicionar</span>
+            <span className="hidden sm:inline">Adicionar ao carrinho</span>
           </Button>
-          <WishlistButton productId={product.id} productName={product.name} variant="full" />
+          <WishlistButton
+            productId={product.id}
+            productName={product.name}
+            variant="full"
+            className="shrink-0"
+          />
         </div>
 
         <ul className="grid gap-3 rounded-2xl border border-border p-4 text-sm sm:grid-cols-2">

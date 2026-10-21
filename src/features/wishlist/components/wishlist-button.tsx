@@ -35,7 +35,7 @@ export function WishlistButton({
         aria-pressed={active}
         aria-label={label}
         className={cn(
-          "inline-flex h-13 items-center justify-center gap-2 rounded-full border px-5 text-sm font-semibold transition",
+          "inline-flex h-13 min-w-13 items-center justify-center gap-2 rounded-full border px-3.5 text-sm font-semibold transition sm:px-5",
           active ? "border-accent text-accent" : "border-border hover:border-foreground",
           className,
         )}
