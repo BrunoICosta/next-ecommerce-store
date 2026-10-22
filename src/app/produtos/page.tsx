@@ -17,8 +17,11 @@ export const metadata: Metadata = {
 /**
  * With `output: "export"` there is no server to read the query string, so the
  * filtered view reads useSearchParams() on the client. The Suspense fallback is
- * the full, unfiltered grid: the static HTML is still complete and crawlable.
+ * the first products of the unfiltered grid, so the static HTML has real
+ * content (every product page is also listed in the sitemap) while staying light.
  */
+const FALLBACK_COUNT = 12;
+
 export default function ProductsPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -28,7 +31,15 @@ export default function ProductsPage() {
           Encontre a peça certa filtrando por categoria, preço, cor e tamanho.
         </p>
       </header>
-      <Suspense fallback={<ProductGrid products={getAllProducts()} className="lg:ml-[292px]" />}>
+      <h2 className="sr-only">Resultados</h2>
+      <Suspense
+        fallback={
+          <ProductGrid
+            products={getAllProducts().slice(0, FALLBACK_COUNT)}
+            className="lg:ml-[292px]"
+          />
+        }
+      >
         <CatalogView />
       </Suspense>
     </main>
