@@ -1,7 +1,13 @@
 {
   "name": "next-ecommerce-store",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "Loja virtual estática com Next.js 16, React 19, Zustand e checkout com Zod.",
+  "author": "Bruno Vinicius Isaac Costa (https://github.com/BrunoICosta)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
