@@ -3,12 +3,14 @@
 import { Check } from "lucide-react";
 import { useId, type FormEvent, type ReactNode } from "react";
 
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 import { formatRating } from "@/lib/format";
 
-import { categories } from "../data/categories";
-import { colors } from "../data/colors";
+import { getCategories } from "../data/categories";
+import { getColors } from "../data/colors";
 import { RATING_OPTIONS, SIZE_ORDER, toggleValue, type CatalogFilters } from "../filters";
+import { sizeLabel } from "../sizes";
 import type { CategorySlug } from "../types";
 
 interface FilterPanelProps {
@@ -17,11 +19,11 @@ interface FilterPanelProps {
   onChange: (patch: Partial<CatalogFilters>) => void;
 }
 
-const PRICE_PRESETS: { label: string; min: number | null; max: number | null }[] = [
-  { label: "Até R$ 100", min: null, max: 100 },
-  { label: "R$ 100 a R$ 250", min: 100, max: 250 },
-  { label: "R$ 250 a R$ 400", min: 250, max: 400 },
-  { label: "Acima de R$ 400", min: 400, max: null },
+const PRICE_PRESETS: { min: number | null; max: number | null }[] = [
+  { min: null, max: 100 },
+  { min: 100, max: 250 },
+  { min: 250, max: 400 },
+  { min: 400, max: null },
 ];
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -42,6 +44,8 @@ function parsePrice(value: FormDataEntryValue | null): number | null {
 export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelProps) {
   // The panel renders twice (desktop sidebar + mobile sheet); radio groups need unique names.
   const ratingGroup = useId();
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.catalog;
 
   function handlePriceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,9 +58,9 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
 
   return (
     <div className="flex flex-col gap-6">
-      <Section title="Categorias">
+      <Section title={t.categories}>
         <ul className="space-y-2">
-          {categories.map((category) => {
+          {getCategories(locale).map((category) => {
             const checked = filters.categories.includes(category.slug);
             return (
               <li key={category.slug}>
@@ -80,13 +84,14 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
         </ul>
       </Section>
 
-      <Section title="Preço">
+      <Section title={t.price}>
         <div className="flex flex-wrap gap-2">
-          {PRICE_PRESETS.map((preset) => {
+          {PRICE_PRESETS.map((preset, index) => {
+            const label = t.pricePresets[index];
             const active = filters.minPrice === preset.min && filters.maxPrice === preset.max;
             return (
               <button
-                key={preset.label}
+                key={label}
                 type="button"
                 aria-pressed={active}
                 onClick={() =>
@@ -103,7 +108,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
                     : "border-border hover:border-foreground",
                 )}
               >
-                {preset.label}
+                {label}
               </button>
             );
           })}
@@ -114,7 +119,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
           className="mt-4 flex items-end gap-2"
         >
           <label className="flex-1 text-xs text-muted-foreground">
-            Mínimo (R$)
+            {t.priceMin}
             <input
               name="min"
               inputMode="numeric"
@@ -124,7 +129,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
             />
           </label>
           <label className="flex-1 text-xs text-muted-foreground">
-            Máximo (R$)
+            {t.priceMax}
             <input
               name="max"
               inputMode="numeric"
@@ -137,14 +142,14 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
             type="submit"
             className="h-10 rounded-lg bg-foreground px-3 text-sm font-semibold text-background"
           >
-            Ok
+            {t.apply}
           </button>
         </form>
       </Section>
 
-      <Section title="Cores">
+      <Section title={t.colors}>
         <ul className="flex flex-wrap gap-2.5">
-          {colors.map((color) => {
+          {getColors(locale).map((color) => {
             const active = filters.colors.includes(color.id);
             return (
               <li key={color.id}>
@@ -174,7 +179,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
         </ul>
       </Section>
 
-      <Section title="Tamanhos">
+      <Section title={t.sizes}>
         <ul className="grid grid-cols-5 gap-2">
           {SIZE_ORDER.map((size) => {
             const active = filters.sizes.includes(size);
@@ -183,7 +188,11 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
                 <button
                   type="button"
                   aria-pressed={active}
-                  aria-label={size === "U" ? "Tamanho único" : `Tamanho ${size}`}
+                  aria-label={
+                    size === "U"
+                      ? dictionary.common.oneSize
+                      : dictionary.product.sizeAria(sizeLabel(size, locale))
+                  }
                   onClick={() => onChange({ sizes: toggleValue(filters.sizes, size) })}
                   className={cn(
                     "h-9 w-full rounded-lg border text-xs font-semibold transition",
@@ -192,7 +201,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
                       : "border-border hover:border-foreground",
                   )}
                 >
-                  {size === "U" ? "Único" : size}
+                  {size === "U" ? "U" : sizeLabel(size, locale)}
                 </button>
               </li>
             );
@@ -200,7 +209,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
         </ul>
       </Section>
 
-      <Section title="Avaliação">
+      <Section title={t.rating}>
         <ul className="space-y-2 text-sm">
           {[...RATING_OPTIONS, null].map((rating) => (
             <li key={rating ?? "all"}>
@@ -212,7 +221,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
                   onChange={() => onChange({ minRating: rating })}
                   className="size-4 accent-accent"
                 />
-                {rating === null ? "Todas" : `${formatRating(rating)} estrelas ou mais`}
+                {rating === null ? t.ratingAll : t.ratingAtLeast(formatRating(rating, locale))}
               </label>
             </li>
           ))}
@@ -226,7 +235,7 @@ export function FilterPanel({ filters, categoryCounts, onChange }: FilterPanelPr
           onChange={(event) => onChange({ onSale: event.target.checked })}
           className="size-4 accent-accent"
         />
-        Somente ofertas
+        {t.onlySale}
       </label>
     </div>
   );

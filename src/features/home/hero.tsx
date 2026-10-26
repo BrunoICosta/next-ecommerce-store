@@ -3,7 +3,9 @@ import { ArrowRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import type { CategorySlug, ColorId } from "@/features/catalog";
 import { ProductArt, type ArtView } from "@/features/catalog/components/product-art";
-import { routes } from "@/lib/routes";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+import { createRoutes } from "@/lib/routes";
 
 const heroTiles: { category: CategorySlug; color: ColorId; view?: ArtView }[] = [
   { category: "moletons", color: "terracota", view: 2 },
@@ -26,42 +28,39 @@ function HeroTile({ category, color, view }: (typeof heroTiles)[number]) {
   );
 }
 
-export function Hero() {
+export function Hero({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale).home;
+  const routes = createRoutes(locale);
   return (
     <section className="relative overflow-hidden border-b border-border bg-accent-soft/60">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 md:py-20">
         <div>
-          <p className="text-sm font-semibold tracking-widest text-accent uppercase">
-            Coleção primavera 2026
-          </p>
+          <p className="text-sm font-semibold tracking-widest text-accent uppercase">{t.eyebrow}</p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Básicos bem feitos para vestir todo dia.
+            {t.title}
           </h1>
-          <p className="mt-5 max-w-md text-lg text-pretty text-muted-foreground">
-            Algodão pima, tecidos tecnológicos e modelagens pensadas para durar. Troca grátis em até
-            30 dias.
-          </p>
+          <p className="mt-5 max-w-md text-lg text-pretty text-muted-foreground">{t.subtitle}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href={routes.products()} size="lg">
-              Ver coleção
+              {t.shopNow}
               <ArrowRight className="size-4" aria-hidden />
             </ButtonLink>
             <ButtonLink href={routes.products("ofertas=1")} size="lg" variant="outline">
-              Ofertas da semana
+              {t.deals}
             </ButtonLink>
           </div>
           <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 text-sm">
             <div>
-              <dt className="text-muted-foreground">Avaliação média</dt>
-              <dd className="text-xl font-semibold">4,5/5</dd>
+              <dt className="text-muted-foreground">{t.statRating}</dt>
+              <dd className="text-xl font-semibold">{t.statRatingValue}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Produtos</dt>
+              <dt className="text-muted-foreground">{t.statProducts}</dt>
               <dd className="text-xl font-semibold">40</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Frete grátis</dt>
-              <dd className="text-xl font-semibold">R$ 299+</dd>
+              <dt className="text-muted-foreground">{t.statShipping}</dt>
+              <dd className="text-xl font-semibold">{t.statShippingValue}</dd>
             </div>
           </dl>
         </div>

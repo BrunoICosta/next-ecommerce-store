@@ -2,6 +2,7 @@
 
 import { Minus, Plus } from "lucide-react";
 
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
 interface QuantityStepperProps {
@@ -18,9 +19,11 @@ export function QuantityStepper({
   onChange,
   min = 1,
   max = 10,
-  label = "Quantidade",
+  label,
   size = "md",
 }: QuantityStepperProps) {
+  const { t } = useI18n();
+  const groupLabel = label ?? t.product.quantity;
   const buttonClass = cn(
     "inline-flex items-center justify-center rounded-full transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40",
     size === "sm" ? "size-8" : "size-10",
@@ -29,7 +32,7 @@ export function QuantityStepper({
   return (
     <div
       role="group"
-      aria-label={label}
+      aria-label={groupLabel}
       className={cn(
         "inline-flex items-center rounded-full border border-border bg-card",
         size === "sm" ? "p-0.5" : "p-1",
@@ -40,13 +43,13 @@ export function QuantityStepper({
         className={buttonClass}
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        aria-label="Diminuir quantidade"
+        aria-label={t.product.decrease}
       >
         <Minus className="size-4" aria-hidden />
       </button>
       <output
         aria-live="polite"
-        aria-label={`${label}: ${value}`}
+        aria-label={`${groupLabel}: ${value}`}
         className={cn(
           "text-center font-semibold tabular-nums",
           size === "sm" ? "w-7 text-sm" : "w-9",
@@ -59,7 +62,7 @@ export function QuantityStepper({
         className={buttonClass}
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        aria-label="Aumentar quantidade"
+        aria-label={t.product.increase}
       >
         <Plus className="size-4" aria-hidden />
       </button>

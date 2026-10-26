@@ -1,31 +1,56 @@
-import { products } from "./data/products";
+import type { Locale } from "@/i18n/config";
+
+import { products as baseProducts } from "./data/products";
+import { productsEn } from "./data/products.en";
 import type { CategorySlug, Product } from "./types";
 
-const productBySlug = new Map(products.map((product) => [product.slug, product]));
-const productById = new Map(products.map((product) => [product.id, product]));
+/**
+ * Catalog text lives in Portuguese in `data/products.ts` and in English in
+ * `data/products.en.ts`. Localized lists are built once per locale and reused,
+ * so object identity is stable (handy for memoization and the search index).
+ */
+const catalogByLocale = new Map<Locale, Product[]>();
 
-export function getAllProducts(): Product[] {
-  return products;
+function localize(product: Product, locale: Locale): Product {
+  if (locale === "pt-BR") return product;
+  const text = productsEn[product.slug];
+  return text ? { ...product, ...text } : product;
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return productBySlug.get(slug);
+export function getAllProducts(locale: Locale): Product[] {
+  let list = catalogByLocale.get(locale);
+  if (!list) {
+    list = baseProducts.map((product) => localize(product, locale));
+    catalogByLocale.set(locale, list);
+  }
+  return list;
 }
 
-export function getProductById(id: string): Product | undefined {
-  return productById.get(id);
+export function getProductBySlug(slug: string, locale: Locale): Product | undefined {
+  return getAllProducts(locale).find((product) => product.slug === slug);
 }
 
-export function getProductsByCategory(category: CategorySlug): Product[] {
-  return products.filter((product) => product.category === category);
+export function getProductById(id: string, locale: Locale): Product | undefined {
+  return getAllProducts(locale).find((product) => product.id === id);
 }
 
-export function getBestSellers(limit = 8): Product[] {
-  return [...products].sort((a, b) => b.soldCount - a.soldCount).slice(0, limit);
+/** Price lookup that does not depend on the language. */
+export function getProductPrice(id: string): number | undefined {
+  return baseProducts.find((product) => product.id === id)?.price;
 }
 
-export function getNewArrivals(limit = 4): Product[] {
-  return [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
+export function getProductsByCategory(category: CategorySlug, locale: Locale): Product[] {
+  return getAllProducts(locale).filter((product) => product.category === category);
+}
+
+export function getBestSellers(locale: Locale, limit = 8): Product[] {
+  return [...getAllProducts(locale)].sort((a, b) => b.soldCount - a.soldCount).slice(0, limit);
+}
+
+export function getNewArrivals(locale: Locale, limit = 4): Product[] {
+  return [...getAllProducts(locale)]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit);
 }
 
 export function isOnSale(product: Product): boolean {
@@ -41,8 +66,8 @@ export function getDiscountPercent(product: Product): number {
  * Related products: same category first (closest price wins), then fills the
  * remaining slots with products that share at least one color.
  */
-export function getRelatedProducts(product: Product, limit = 4): Product[] {
-  const others = products.filter((candidate) => candidate.id !== product.id);
+export function getRelatedProducts(product: Product, locale: Locale, limit = 4): Product[] {
+  const others = getAllProducts(locale).filter((candidate) => candidate.id !== product.id);
   const sameCategory = others
     .filter((candidate) => candidate.category === product.category)
     .sort((a, b) => Math.abs(a.price - product.price) - Math.abs(b.price - product.price));
@@ -55,7 +80,7 @@ export function getRelatedProducts(product: Product, limit = 4): Product[] {
 }
 
 export function getCategoryCounts(): Record<CategorySlug, number> {
-  return products.reduce(
+  return baseProducts.reduce(
     (counts, product) => {
       counts[product.category] += 1;
       return counts;

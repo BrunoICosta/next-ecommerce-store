@@ -2,8 +2,9 @@
 
 import { OrderSummary } from "@/features/cart/components/order-summary";
 import type { CartLine, CartTotals } from "@/features/cart/types";
-import { getColor } from "@/features/catalog";
+import { getColor, sizeLabel } from "@/features/catalog";
 import { ProductArt } from "@/features/catalog/components/product-art";
+import { useI18n } from "@/i18n/i18n-provider";
 import { formatPrice } from "@/lib/format";
 
 interface CheckoutSummaryProps {
@@ -13,9 +14,10 @@ interface CheckoutSummaryProps {
 }
 
 export function CheckoutSummary({ lines, totals, paymentDiscount }: CheckoutSummaryProps) {
+  const { locale, t } = useI18n();
   return (
     <OrderSummary totals={totals} paymentDiscount={paymentDiscount}>
-      <ul className="space-y-3 border-t border-border pt-5" aria-label="Itens do pedido">
+      <ul className="space-y-3 border-t border-border pt-5" aria-label={t.summary.orderItems}>
         {lines.map((line) => (
           <li key={line.key} className="flex items-center gap-3 text-sm">
             <span className="relative w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
@@ -32,11 +34,11 @@ export function CheckoutSummary({ lines, totals, paymentDiscount }: CheckoutSumm
             <span className="min-w-0 flex-1">
               <span className="block truncate font-medium">{line.product.name}</span>
               <span className="text-muted-foreground">
-                {getColor(line.color).name}
-                {line.size !== "U" && ` · ${line.size}`}
+                {getColor(line.color, locale).name}
+                {line.size !== "U" && ` · ${sizeLabel(line.size, locale)}`}
               </span>
             </span>
-            <span className="font-medium">{formatPrice(line.lineTotal)}</span>
+            <span className="font-medium">{formatPrice(line.lineTotal, locale)}</span>
           </li>
         ))}
       </ul>

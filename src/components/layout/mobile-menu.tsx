@@ -4,11 +4,15 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { navLinks } from "./nav-links";
+import { useI18n } from "@/i18n/i18n-provider";
+
+import { getNavLinks } from "./nav-links";
 import { SearchForm } from "./search-form";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const { t, routes } = useI18n();
+  const navLinks = getNavLinks(routes, t.header.nav);
 
   useEffect(() => {
     if (!open) return;
@@ -29,7 +33,7 @@ export function MobileMenu() {
         className="inline-flex size-10 items-center justify-center rounded-full hover:bg-muted"
         aria-expanded={open}
         aria-controls="mobile-menu"
-        aria-label={open ? "Fechar menu" : "Abrir menu"}
+        aria-label={open ? t.header.closeMenu : t.header.openMenu}
       >
         {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
       </button>
@@ -40,7 +44,7 @@ export function MobileMenu() {
           className="absolute inset-x-0 top-full animate-fade-in border-b border-border bg-background px-4 pt-4 pb-6 shadow-lg"
         >
           <SearchForm onSubmitted={close} />
-          <nav aria-label="Menu principal" className="mt-4">
+          <nav aria-label={t.header.mainNav} className="mt-4">
             <ul className="flex flex-col">
               {navLinks.map((link) => (
                 <li key={link.href}>

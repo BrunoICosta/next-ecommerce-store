@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useId, type FormEvent } from "react";
 
 import { cn } from "@/lib/cn";
-import { routes } from "@/lib/routes";
+import { useI18n } from "@/i18n/i18n-provider";
 
 interface SearchFormProps {
   className?: string;
@@ -14,6 +14,7 @@ interface SearchFormProps {
 
 export function SearchForm({ className, onSubmitted }: SearchFormProps) {
   const router = useRouter();
+  const { t, routes } = useI18n();
   const inputId = useId();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -27,7 +28,7 @@ export function SearchForm({ className, onSubmitted }: SearchFormProps) {
   return (
     <form role="search" onSubmit={handleSubmit} className={cn("relative", className)}>
       <label htmlFor={inputId} className="sr-only">
-        Buscar produtos
+        {t.header.searchLabel}
       </label>
       <Search
         className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -37,7 +38,7 @@ export function SearchForm({ className, onSubmitted }: SearchFormProps) {
         id={inputId}
         name="q"
         type="search"
-        placeholder="Buscar camisetas, tênis..."
+        placeholder={t.header.searchPlaceholder}
         autoComplete="off"
         className="h-10 w-full rounded-full border border-border bg-card pr-4 pl-9 text-sm placeholder:text-muted-foreground focus:border-accent focus:outline-none"
       />

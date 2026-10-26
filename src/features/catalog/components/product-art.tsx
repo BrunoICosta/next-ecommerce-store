@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { getColor } from "../data/colors";
+import { getSwatch } from "../data/colors";
 import type { CategorySlug, ColorId } from "../types";
 
 export type ArtView = 0 | 1 | 2;
@@ -195,7 +195,7 @@ export function ProductArt({
   width,
   height,
 }: ProductArtProps) {
-  const { hex, shade } = getColor(color);
+  const { hex, shade } = getSwatch(color);
   const Silhouette = SILHOUETTES[category];
   const transform =
     view === 1

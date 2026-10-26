@@ -2,34 +2,24 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Barcode, CreditCard, LoaderCircle, Lock, QrCode } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { SelectField, TextField } from "@/components/ui/form-field";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/i18n-provider";
 import { formatPrice } from "@/lib/format";
 
 import { getInstallmentOptions } from "../order";
-import { paymentSchema, type PaymentData, type PaymentMethod } from "../schemas";
+import { createPaymentSchema, type PaymentData, type PaymentMethod } from "../schemas";
 import { detectCardBrand, maskCardNumber, maskExpiry, onlyDigits } from "../validators";
 
-const METHODS: {
-  id: PaymentMethod;
-  label: string;
-  description: string;
-  icon: typeof CreditCard;
-}[] = [
-  { id: "card", label: "Cartão de crédito", description: "Até 6x sem juros", icon: CreditCard },
-  { id: "pix", label: "Pix", description: "5% de desconto", icon: QrCode },
-  { id: "boleto", label: "Boleto", description: "Vence em 3 dias úteis", icon: Barcode },
+const METHODS: { id: PaymentMethod; icon: typeof CreditCard }[] = [
+  { id: "card", icon: CreditCard },
+  { id: "pix", icon: QrCode },
+  { id: "boleto", icon: Barcode },
 ];
-
-const SUBMIT_LABEL: Record<PaymentMethod, string> = {
-  card: "Pagar",
-  pix: "Gerar Pix de",
-  boleto: "Gerar boleto de",
-};
 
 const BRAND_LABEL = { visa: "Visa", mastercard: "Mastercard", amex: "Amex", elo: "Elo" } as const;
 
@@ -42,13 +32,16 @@ interface PaymentStepProps {
 }
 
 export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: PaymentStepProps) {
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.checkout.payment;
+  const schema = useMemo(() => createPaymentSchema(dictionary.validation), [dictionary]);
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
   } = useForm<PaymentData>({
-    resolver: zodResolver(paymentSchema),
+    resolver: zodResolver(schema),
     mode: "onTouched",
     defaultValues: {
       method: "card",
@@ -72,17 +65,14 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Pagamento</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Demonstração: use o cartão de teste 4111 1111 1111 1111, qualquer nome, validade futura e
-          CVV 123.
-        </p>
+        <h2 className="text-xl font-semibold">{t.title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
       <fieldset>
-        <legend className="sr-only">Forma de pagamento</legend>
+        <legend className="sr-only">{t.method}</legend>
         <div className="grid gap-3 sm:grid-cols-3">
-          {METHODS.map(({ id, label, description, icon: Icon }) => (
+          {METHODS.map(({ id, icon: Icon }) => (
             <label
               key={id}
               className={cn(
@@ -95,8 +85,8 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
               <input type="radio" value={id} className="sr-only" {...register("method")} />
               <Icon className={cn("size-6", method === id && "text-accent")} aria-hidden />
               <span>
-                <span className="block font-semibold">{label}</span>
-                <span className="text-muted-foreground">{description}</span>
+                <span className="block font-semibold">{t.methods[id].label}</span>
+                <span className="text-muted-foreground">{t.methods[id].description}</span>
               </span>
             </label>
           ))}
@@ -106,7 +96,7 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
       {method === "card" && (
         <div className="grid gap-4 sm:grid-cols-4">
           <TextField
-            label="Número do cartão"
+            label={t.cardNumber}
             inputMode="numeric"
             autoComplete="cc-number"
             placeholder="0000 0000 0000 0000"
@@ -128,7 +118,7 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
             })}
           />
           <TextField
-            label="Nome impresso no cartão"
+            label={t.cardName}
             autoComplete="cc-name"
             containerClassName="sm:col-span-4"
             className="uppercase"
@@ -136,10 +126,10 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
             {...register("cardName")}
           />
           <TextField
-            label="Validade"
+            label={t.expiry}
             inputMode="numeric"
             autoComplete="cc-exp"
-            placeholder="MM/AA"
+            placeholder={t.expiryPlaceholder}
             containerClassName="sm:col-span-2"
             error={errors.expiry?.message}
             {...register("expiry", {
@@ -150,7 +140,7 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
             })}
           />
           <TextField
-            label="CVV"
+            label={t.cvv}
             inputMode="numeric"
             autoComplete="cc-csc"
             placeholder="123"
@@ -162,14 +152,14 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
             })}
           />
           <SelectField
-            label="Parcelas"
+            label={t.installments}
             containerClassName="sm:col-span-4"
             error={errors.installments?.message}
             {...register("installments")}
           >
             {getInstallmentOptions(amount).map(({ count, amount: installment }) => (
               <option key={count} value={String(count)}>
-                {count}x de {formatPrice(installment)} sem juros
+                {t.installmentOption(count, installment)}
               </option>
             ))}
           </SelectField>
@@ -180,8 +170,9 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
         <div className="flex gap-4 rounded-2xl bg-muted p-5 text-sm">
           <QrCode className="size-10 shrink-0 text-accent" aria-hidden />
           <p>
-            Ao confirmar, geramos um código Pix copia e cola com validade de 30 minutos. Você paga{" "}
-            <strong>{formatPrice(amount)}</strong> já com 5% de desconto.
+            {t.pixInfo(amount)[0]}
+            <strong>{t.pixInfo(amount)[1]}</strong>
+            {t.pixInfo(amount)[2]}
           </p>
         </div>
       )}
@@ -189,28 +180,25 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
       {method === "boleto" && (
         <div className="flex gap-4 rounded-2xl bg-muted p-5 text-sm">
           <Barcode className="size-10 shrink-0 text-accent" aria-hidden />
-          <p>
-            O boleto vence em 3 dias úteis e a compensação leva até 2 dias úteis após o pagamento. O
-            prazo de entrega começa a contar depois da confirmação.
-          </p>
+          <p>{t.boletoInfo}</p>
         </div>
       )}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="ghost" size="lg" onClick={onBack} disabled={isSubmitting}>
           <ArrowLeft className="size-4" aria-hidden />
-          Voltar
+          {dictionary.common.back}
         </Button>
         <Button type="submit" size="lg" disabled={isSubmitting} aria-live="polite">
           {isSubmitting ? (
             <>
               <LoaderCircle className="size-4 animate-spin" aria-hidden />
-              Processando…
+              {t.processing}
             </>
           ) : (
             <>
               <Lock className="size-4" aria-hidden />
-              {SUBMIT_LABEL[method]} {formatPrice(amount)}
+              {t.submit[method]} {formatPrice(amount, locale)}
             </>
           )}
         </Button>

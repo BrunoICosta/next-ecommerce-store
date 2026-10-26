@@ -5,13 +5,10 @@ import { useState } from "react";
 import type { CategorySlug, ColorId } from "@/features/catalog";
 import { getColor } from "@/features/catalog";
 import { ProductArt, type ArtView } from "@/features/catalog/components/product-art";
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
-const VIEWS: { view: ArtView; label: string }[] = [
-  { view: 0, label: "Frente" },
-  { view: 1, label: "Detalhe" },
-  { view: 2, label: "Ambiente" },
-];
+const VIEWS: ArtView[] = [0, 1, 2];
 
 interface ProductGalleryProps {
   name: string;
@@ -21,17 +18,19 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ name, category, color }: ProductGalleryProps) {
   const [active, setActive] = useState<ArtView>(0);
-  const colorName = getColor(color).name;
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.product;
+  const colorName = getColor(color, locale).name;
 
   return (
     <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-start lg:sticky lg:top-32 lg:self-start">
-      <ul className="flex gap-3 sm:flex-col" aria-label="Imagens do produto">
-        {VIEWS.map(({ view, label }, index) => (
+      <ul className="flex gap-3 sm:flex-col" aria-label={t.gallery}>
+        {VIEWS.map((view, index) => (
           <li key={view}>
             <button
               type="button"
               onClick={() => setActive(view)}
-              aria-label={`Ver imagem ${index + 1} de ${VIEWS.length}: ${label}`}
+              aria-label={t.viewImage(index + 1, VIEWS.length, t.views[view])}
               aria-current={active === view}
               className={cn(
                 "block w-20 overflow-hidden rounded-xl border-2 transition",
@@ -55,7 +54,7 @@ export function ProductGallery({ name, category, color }: ProductGalleryProps) {
           category={category}
           color={color}
           view={active}
-          label={`${name} na cor ${colorName}, imagem: ${VIEWS[active].label.toLowerCase()}`}
+          label={t.imageLabel(name, colorName, t.views[active])}
           className="aspect-[4/5] w-full animate-fade-in"
         />
       </div>

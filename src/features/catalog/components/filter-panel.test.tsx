@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -7,11 +7,13 @@ import { getCategoryCounts } from "../queries";
 import { ActiveFilters } from "./active-filters";
 import { FilterPanel } from "./filter-panel";
 
+import { renderWithI18n } from "@/test/render";
+
 describe("FilterPanel", () => {
   it("emits patches for categories, colors, sizes and price", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(
+    renderWithI18n(
       <FilterPanel
         filters={{ ...DEFAULT_FILTERS, categories: ["tenis"] }}
         categoryCounts={getCategoryCounts()}
@@ -43,7 +45,7 @@ describe("ActiveFilters", () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     const onClear = vi.fn();
-    render(
+    renderWithI18n(
       <ActiveFilters
         filters={{ ...DEFAULT_FILTERS, query: "boné", colors: ["preto", "vinho"], maxPrice: 100 }}
         onChange={onChange}
@@ -60,7 +62,7 @@ describe("ActiveFilters", () => {
   });
 
   it("renders nothing without active filters", () => {
-    const { container } = render(
+    const { container } = renderWithI18n(
       <ActiveFilters filters={DEFAULT_FILTERS} onChange={vi.fn()} onClear={vi.fn()} />,
     );
     expect(container).toBeEmptyDOMElement();

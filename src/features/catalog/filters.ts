@@ -1,17 +1,19 @@
+import type { Locale } from "@/i18n/config";
+
 import { getCategory } from "./data/categories";
 import { getColor } from "./data/colors";
 import type { CategorySlug, ColorId, Product, Size } from "./types";
 
 export const SORT_OPTIONS = [
-  { value: "relevancia", label: "Relevância" },
-  { value: "mais-vendidos", label: "Mais vendidos" },
-  { value: "novidades", label: "Novidades" },
-  { value: "menor-preco", label: "Menor preço" },
-  { value: "maior-preco", label: "Maior preço" },
-  { value: "avaliacao", label: "Melhor avaliados" },
+  "relevancia",
+  "mais-vendidos",
+  "novidades",
+  "menor-preco",
+  "maior-preco",
+  "avaliacao",
 ] as const;
 
-export type SortOption = (typeof SORT_OPTIONS)[number]["value"];
+export type SortOption = (typeof SORT_OPTIONS)[number];
 
 export const SIZE_ORDER: Size[] = [
   "PP",
@@ -62,13 +64,13 @@ export function normalizeText(value: string): string {
   return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
 
-function searchableText(product: Product): string {
+function searchableText(product: Product, locale: Locale): string {
   return normalizeText(
     [
       product.name,
       product.tagline,
-      getCategory(product.category).name,
-      ...product.colors.map((color) => getColor(color).name),
+      getCategory(product.category, locale).name,
+      ...product.colors.map((color) => getColor(color, locale).name),
       ...product.features,
     ].join(" "),
   );
@@ -76,18 +78,18 @@ function searchableText(product: Product): string {
 
 const searchIndex = new WeakMap<Product, string>();
 
-function getSearchText(product: Product): string {
+function getSearchText(product: Product, locale: Locale): string {
   let text = searchIndex.get(product);
   if (text === undefined) {
-    text = searchableText(product);
+    text = searchableText(product, locale);
     searchIndex.set(product, text);
   }
   return text;
 }
 
-function matchesQuery(product: Product, terms: string[]): boolean {
+function matchesQuery(product: Product, terms: string[], locale: Locale): boolean {
   if (terms.length === 0) return true;
-  const text = getSearchText(product);
+  const text = getSearchText(product, locale);
   return terms.every((term) => text.includes(term));
 }
 
@@ -118,7 +120,15 @@ function compareBy(sort: SortOption, terms: string[]) {
   };
 }
 
-export function filterProducts(products: Product[], filters: CatalogFilters): Product[] {
+/**
+ * `products` must already be localized for `locale` (see getAllProducts), so
+ * the search matches names, colors and categories in the shopper's language.
+ */
+export function filterProducts(
+  products: Product[],
+  filters: CatalogFilters,
+  locale: Locale,
+): Product[] {
   const terms = normalizeText(filters.query).split(/\s+/).filter(Boolean);
   const minCents = filters.minPrice !== null ? filters.minPrice * 100 : null;
   const maxCents = filters.maxPrice !== null ? filters.maxPrice * 100 : null;
@@ -140,7 +150,7 @@ export function filterProducts(products: Product[], filters: CatalogFilters): Pr
       if (filters.onSale && !(product.compareAtPrice && product.compareAtPrice > product.price)) {
         return false;
       }
-      return matchesQuery(product, terms);
+      return matchesQuery(product, terms, locale);
     })
     .sort(compareBy(filters.sort, terms));
 }

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { useCart, useCartHydrated } from "@/features/cart/hooks";
 import { useCartStore } from "@/features/cart/store";
-import { routes } from "@/lib/routes";
+import { useI18n } from "@/i18n/i18n-provider";
 
 import { calculatePaymentDiscount, createOrder } from "../order";
 import { useOrderStore } from "../order-store";
@@ -45,6 +45,7 @@ export function CheckoutView() {
   const clearCart = useCartStore((state) => state.clear);
   const addOrder = useOrderStore((state) => state.addOrder);
   const router = useRouter();
+  const { t, routes } = useI18n();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [redirecting, setRedirecting] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,7 @@ export function CheckoutView() {
         role="status"
       >
         <LoaderCircle className="size-5 animate-spin" aria-hidden />
-        Confirmando seu pedido…
+        {t.checkout.redirecting}
       </div>
     );
   }
@@ -93,10 +94,10 @@ export function CheckoutView() {
     return (
       <div className="flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-20 text-center">
         <ShoppingBag className="size-10 text-muted-foreground" aria-hidden />
-        <h2 className="mt-4 text-xl font-semibold">Seu carrinho está vazio</h2>
-        <p className="mt-2 text-muted-foreground">Adicione produtos para finalizar a compra.</p>
+        <h2 className="mt-4 text-xl font-semibold">{t.checkout.emptyTitle}</h2>
+        <p className="mt-2 text-muted-foreground">{t.checkout.emptyText}</p>
         <ButtonLink href={routes.products()} className="mt-6">
-          Ver produtos
+          {t.cart.seeProducts}
         </ButtonLink>
       </div>
     );

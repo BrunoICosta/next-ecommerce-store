@@ -1,5 +1,7 @@
 import { Star } from "lucide-react";
 
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 import { cn } from "@/lib/cn";
 import { formatRating } from "@/lib/format";
 
@@ -7,10 +9,12 @@ interface RatingProps {
   value: number;
   count?: number;
   className?: string;
+  locale: Locale;
 }
 
-export function Rating({ value, count, className }: RatingProps) {
-  const label = `Avaliação ${formatRating(value)} de 5${count !== undefined ? `, ${count} avaliações` : ""}`;
+export function Rating({ value, count, className, locale }: RatingProps) {
+  const formatted = formatRating(value, locale);
+  const label = getDictionary(locale).product.rating(formatted, count);
   return (
     <div
       className={cn("flex items-center gap-1.5 text-sm", className)}
@@ -38,7 +42,7 @@ export function Rating({ value, count, className }: RatingProps) {
         })}
       </span>
       <span className="font-medium" aria-hidden>
-        {formatRating(value)}
+        {formatted}
       </span>
       {count !== undefined && (
         <span className="text-muted-foreground" aria-hidden>

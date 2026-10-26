@@ -29,7 +29,15 @@ function Finder({ x, y }: { x: number; y: number }) {
 }
 
 /** Decorative QR-like pattern for the demo Pix payment (not a scannable code). */
-export function FakeQrCode({ value, className }: { value: string; className?: string }) {
+export function FakeQrCode({
+  value,
+  label,
+  className,
+}: {
+  value: string;
+  label: string;
+  className?: string;
+}) {
   const random = seededRandom(value);
   const cells: { x: number; y: number }[] = [];
   for (let y = 0; y < SIZE; y += 1) {
@@ -43,7 +51,7 @@ export function FakeQrCode({ value, className }: { value: string; className?: st
       viewBox={`-2 -2 ${SIZE + 4} ${SIZE + 4}`}
       className={className}
       role="img"
-      aria-label="QR Code ilustrativo do Pix"
+      aria-label={label}
       shapeRendering="crispEdges"
     >
       <rect x={-2} y={-2} width={SIZE + 4} height={SIZE + 4} fill="white" />

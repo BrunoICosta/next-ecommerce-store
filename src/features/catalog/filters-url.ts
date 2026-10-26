@@ -51,7 +51,7 @@ function parseNumber(raw: string | null, { min = 0, max = Infinity } = {}): numb
 
 const isSize = (value: string): value is Size => SIZE_ORDER.includes(value as Size);
 const isSort = (value: string): value is SortOption =>
-  SORT_OPTIONS.some((option) => option.value === value);
+  (SORT_OPTIONS as readonly string[]).includes(value);
 
 export function parseFilters(params: ReadableParams): CatalogFilters {
   const sort = params.get(FILTER_PARAMS.sort) ?? "";

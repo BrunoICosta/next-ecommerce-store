@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { categories } from "./categories";
-import { colors } from "./colors";
+import { categorySlugs } from "./categories";
+import { colorIds } from "./colors";
 import { products } from "./products";
 
 describe("catalog data", () => {
@@ -15,11 +15,11 @@ describe("catalog data", () => {
   });
 
   it("references only known categories and colors", () => {
-    const categorySlugs = new Set(categories.map((c) => c.slug));
-    const colorIds = new Set(colors.map((c) => c.id));
+    const knownCategories = new Set(categorySlugs);
+    const knownColors = new Set(colorIds);
     for (const product of products) {
-      expect(categorySlugs.has(product.category)).toBe(true);
-      product.colors.forEach((color) => expect(colorIds.has(color)).toBe(true));
+      expect(knownCategories.has(product.category)).toBe(true);
+      product.colors.forEach((color) => expect(knownColors.has(color)).toBe(true));
     }
   });
 

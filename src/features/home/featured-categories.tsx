@@ -1,21 +1,28 @@
 import Link from "next/link";
 
-import { categories, getCategoryCounts, getProductsByCategory } from "@/features/catalog";
+import { getCategories, getCategoryCounts, getProductsByCategory } from "@/features/catalog";
 import { ProductArt } from "@/features/catalog/components/product-art";
-import { pluralize } from "@/lib/format";
-import { routes } from "@/lib/routes";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+import { createRoutes } from "@/lib/routes";
 
 import { SectionHeading } from "./section-heading";
 
-export function FeaturedCategories() {
+export function FeaturedCategories({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
+  const routes = createRoutes(locale);
   const counts = getCategoryCounts();
 
   return (
     <section aria-labelledby="categorias" className="mx-auto max-w-7xl px-4 sm:px-6">
-      <SectionHeading id="categorias" eyebrow="Explore" title="Compre por categoria" />
+      <SectionHeading
+        id="categorias"
+        eyebrow={t.home.categoriesEyebrow}
+        title={t.home.categoriesTitle}
+      />
       <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {categories.map((category) => {
-          const [cover] = getProductsByCategory(category.slug);
+        {getCategories(locale).map((category) => {
+          const [cover] = getProductsByCategory(category.slug, locale);
           return (
             <li key={category.slug}>
               <Link
@@ -31,7 +38,7 @@ export function FeaturedCategories() {
                 <span className="block px-4 py-3">
                   <span className="block font-semibold">{category.name}</span>
                   <span className="text-sm text-muted-foreground">
-                    {pluralize(counts[category.slug], "produto", "produtos")}
+                    {t.common.products(counts[category.slug])}
                   </span>
                 </span>
               </Link>

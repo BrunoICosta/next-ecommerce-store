@@ -12,7 +12,8 @@ import { useCartStore } from "@/features/cart/store";
 import { WishlistButton } from "@/features/wishlist/components/wishlist-button";
 import type { ColorId, Product, Size } from "@/features/catalog";
 import { getCategory, getDiscountPercent } from "@/features/catalog";
-import { formatInstallments } from "@/lib/format";
+import { useI18n } from "@/i18n/i18n-provider";
+import { maxInstallments } from "@/lib/format";
 
 import { ProductGallery } from "./product-gallery";
 import { ColorSelector, SizeSelector } from "./variant-selector";
@@ -31,6 +32,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const addItem = useCartStore((state) => state.addItem);
   const openDrawer = useCartStore((state) => state.openDrawer);
   const discount = getDiscountPercent(product);
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.product;
+  const installments = maxInstallments(product.price);
 
   function handleSizeChange(next: Size) {
     setSize(next);
@@ -39,7 +43,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   function handleAddToCart() {
     if (!size) {
-      setSizeError("Selecione um tamanho para continuar.");
+      setSizeError(t.selectSize);
       return;
     }
     addItem({ productId: product.id, color, size, quantity });
@@ -54,22 +58,32 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <div className="flex flex-col gap-6">
         <div>
           <p className="text-sm font-semibold tracking-widest text-accent uppercase">
-            {getCategory(product.category).name}
+            {getCategory(product.category, locale).name}
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             {product.name}
           </h1>
           <p className="mt-2 text-muted-foreground">{product.tagline}</p>
-          <Rating value={product.rating} count={product.reviewCount} className="mt-3" />
+          <Rating
+            value={product.rating}
+            count={product.reviewCount}
+            className="mt-3"
+            locale={locale}
+          />
         </div>
 
         <div>
           <div className="flex items-center gap-3">
-            <Price price={product.price} compareAtPrice={product.compareAtPrice} size="lg" />
+            <Price
+              price={product.price}
+              compareAtPrice={product.compareAtPrice}
+              size="lg"
+              locale={locale}
+            />
             {discount > 0 && <Badge tone="accent">-{discount}%</Badge>}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            ou {formatInstallments(product.price)} · 5% off no Pix
+            {t.installments(installments, Math.ceil(product.price / installments))} · {t.pixHint}
           </p>
         </div>
 
@@ -87,11 +101,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             size="lg"
             className="min-w-0 flex-1 px-4 whitespace-nowrap"
             onClick={handleAddToCart}
-            aria-label="Adicionar ao carrinho"
+            aria-label={t.addToCart}
           >
             <ShoppingBag className="size-5 shrink-0" aria-hidden />
-            <span className="sm:hidden">Adicionar</span>
-            <span className="hidden sm:inline">Adicionar ao carrinho</span>
+            <span className="sm:hidden">{t.addShort}</span>
+            <span className="hidden sm:inline">{t.addToCart}</span>
           </Button>
           <WishlistButton
             productId={product.id}
@@ -105,22 +119,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <li className="flex gap-3">
             <Truck className="size-5 shrink-0 text-accent" aria-hidden />
             <span>
-              <strong className="block">Frete grátis acima de R$ 299</strong>
-              <span className="text-muted-foreground">Calcule o prazo no carrinho.</span>
+              <strong className="block">{t.freeShippingTitle}</strong>
+              <span className="text-muted-foreground">{t.freeShippingText}</span>
             </span>
           </li>
           <li className="flex gap-3">
             <RefreshCcw className="size-5 shrink-0 text-accent" aria-hidden />
             <span>
-              <strong className="block">Troca grátis</strong>
-              <span className="text-muted-foreground">Em até 30 dias após o recebimento.</span>
+              <strong className="block">{t.returnsTitle}</strong>
+              <span className="text-muted-foreground">{t.returnsText}</span>
             </span>
           </li>
         </ul>
 
         <section aria-labelledby="descricao">
           <h2 id="descricao" className="text-lg font-semibold">
-            Sobre o produto
+            {t.about}
           </h2>
           <p className="mt-2 leading-relaxed text-muted-foreground">{product.description}</p>
           <ul className="mt-4 grid gap-2 text-sm sm:grid-cols-2">

@@ -1,4 +1,5 @@
-import { getProductById } from "@/features/catalog";
+import { getProductById, getProductPrice } from "@/features/catalog";
+import type { Locale } from "@/i18n/config";
 
 import type {
   CartItem,
@@ -16,7 +17,6 @@ export const PIX_DISCOUNT_PERCENT = 5;
 const COUPONS: Record<string, Coupon> = {
   BEMVINDO10: {
     code: "BEMVINDO10",
-    description: "10% de desconto na primeira compra",
     percentOff: 10,
   },
 };
@@ -30,9 +30,9 @@ export function findCoupon(code: string): Coupon | null {
 }
 
 /** Resolves stored items against the catalog, dropping products that no longer exist. */
-export function resolveCartLines(items: CartItem[]): CartLine[] {
+export function resolveCartLines(items: CartItem[], locale: Locale): CartLine[] {
   return items.flatMap((item) => {
-    const product = getProductById(item.productId);
+    const product = getProductById(item.productId, locale);
     if (!product) return [];
     return [
       { ...item, product, unitPrice: product.price, lineTotal: product.price * item.quantity },
@@ -78,14 +78,12 @@ export function quoteShipping(cep: string, merchandiseTotal: number): ShippingOp
   return [
     {
       id: "pac",
-      label: "Econômica",
       price: freePac ? 0 : rate.base,
       minDays: rate.minDays,
       maxDays: rate.maxDays,
     },
     {
       id: "sedex",
-      label: "Expressa",
       price: Math.round((rate.base * 1.8) / 10) * 10,
       minDays: Math.max(1, Math.ceil(rate.minDays / 2)),
       maxDays: Math.max(2, Math.ceil(rate.maxDays / 2)),
@@ -101,9 +99,13 @@ interface TotalsInput {
 }
 
 export function calculateTotals({ items, coupon, cep, shippingMethod }: TotalsInput): CartTotals {
-  const lines = resolveCartLines(items);
-  const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
-  const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
+  // Totals only need prices, which are the same in every language.
+  const priced = items.flatMap((item) => {
+    const price = getProductPrice(item.productId);
+    return price === undefined ? [] : [{ price, quantity: item.quantity }];
+  });
+  const subtotal = priced.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  const itemCount = priced.reduce((sum, line) => sum + line.quantity, 0);
   const discount = coupon ? Math.round((subtotal * coupon.percentOff) / 100) : 0;
   const merchandise = subtotal - discount;
 
@@ -118,8 +120,4 @@ export function calculateTotals({ items, coupon, cep, shippingMethod }: TotalsIn
 
 export function amountUntilFreeShipping(merchandiseTotal: number): number {
   return Math.max(0, FREE_SHIPPING_THRESHOLD - merchandiseTotal);
-}
-
-export function formatDeliveryWindow(option: Pick<ShippingOption, "minDays" | "maxDays">): string {
-  return `${option.minDays} a ${option.maxDays} dias úteis`;
 }

@@ -4,9 +4,10 @@ import { MapPin } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/i18n-provider";
 import { formatPrice } from "@/lib/format";
 
-import { formatCep, formatDeliveryWindow, isValidCep, quoteShipping } from "../pricing";
+import { formatCep, isValidCep, quoteShipping } from "../pricing";
 import { useCartStore } from "../store";
 
 interface ShippingCalculatorProps {
@@ -20,6 +21,8 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
   const setShippingMethod = useCartStore((state) => state.setShippingMethod);
   const [draft, setDraft] = useState(cep ? formatCep(cep) : "");
   const [error, setError] = useState<string | null>(null);
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.shipping;
   const inputId = useId();
   const errorId = useId();
 
@@ -28,7 +31,7 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!isValidCep(draft)) {
-      setError("Informe um CEP válido com 8 dígitos.");
+      setError(t.invalidCep);
       return;
     }
     setError(null);
@@ -39,11 +42,11 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
     <section aria-labelledby={`${inputId}-title`} className="space-y-3">
       <h2 id={`${inputId}-title`} className="flex items-center gap-2 text-sm font-semibold">
         <MapPin className="size-4 text-accent" aria-hidden />
-        Calcular frete
+        {t.title}
       </h2>
       <form onSubmit={handleSubmit} className="flex gap-2" noValidate>
         <label htmlFor={inputId} className="sr-only">
-          CEP
+          {t.cep}
         </label>
         <input
           id={inputId}
@@ -60,7 +63,7 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
           type="submit"
           className="h-10 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
         >
-          Calcular
+          {t.calculate}
         </button>
       </form>
       {error && (
@@ -71,7 +74,7 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
 
       {options && (
         <fieldset>
-          <legend className="sr-only">Opções de entrega para o CEP {formatCep(cep ?? "")}</legend>
+          <legend className="sr-only">{t.optionsFor(formatCep(cep ?? ""))}</legend>
           <ul className="space-y-2">
             {options.map((option) => (
               <li key={option.id}>
@@ -92,11 +95,13 @@ export function ShippingCalculator({ merchandiseTotal }: ShippingCalculatorProps
                     className="size-4 accent-accent"
                   />
                   <span className="flex-1">
-                    <span className="block font-medium">{option.label}</span>
-                    <span className="text-muted-foreground">{formatDeliveryWindow(option)}</span>
+                    <span className="block font-medium">{t.methods[option.id]}</span>
+                    <span className="text-muted-foreground">
+                      {t.window(option.minDays, option.maxDays)}
+                    </span>
                   </span>
                   <span className={cn("font-semibold", option.price === 0 && "text-success")}>
-                    {option.price === 0 ? "Grátis" : formatPrice(option.price)}
+                    {option.price === 0 ? t.free : formatPrice(option.price, locale)}
                   </span>
                 </label>
               </li>

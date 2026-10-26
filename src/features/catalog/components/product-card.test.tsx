@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -7,7 +7,9 @@ import { useWishlistStore } from "@/features/wishlist/store";
 import { getProductBySlug } from "../queries";
 import { ProductCard } from "./product-card";
 
-const product = getProductBySlug("tenis-corrida-leve")!;
+import { renderWithI18n } from "@/test/render";
+
+const product = getProductBySlug("tenis-corrida-leve", "pt-BR")!;
 
 describe("ProductCard", () => {
   beforeEach(async () => {
@@ -16,10 +18,10 @@ describe("ProductCard", () => {
   });
 
   it("renders name, link, prices, discount and rating", () => {
-    render(<ProductCard product={product} isNew />);
+    renderWithI18n(<ProductCard product={product} isNew locale="pt-BR" />);
 
     const link = screen.getByRole("link", { name: "Tênis Corrida Leve" });
-    expect(link.getAttribute("href")).toMatch(/^\/produto\/tenis-corrida-leve\/?$/);
+    expect(link.getAttribute("href")).toMatch(/^\/pt-BR\/produto\/tenis-corrida-leve\/?$/);
     expect(screen.getByText("-17%")).toBeInTheDocument();
     expect(screen.getByText("Novo")).toBeInTheDocument();
     expect(screen.getByText(/499,90/)).toBeInTheDocument();
@@ -28,7 +30,9 @@ describe("ProductCard", () => {
   });
 
   it("shows the artwork in the preferred color when filtering", () => {
-    render(<ProductCard product={product} preferredColors={["terracota"]} />);
+    renderWithI18n(
+      <ProductCard product={product} preferredColors={["terracota"]} locale="pt-BR" />,
+    );
     expect(
       screen.getByRole("img", { name: "Tênis Corrida Leve na cor Terracota" }),
     ).toBeInTheDocument();
@@ -36,7 +40,7 @@ describe("ProductCard", () => {
 
   it("toggles the wishlist", async () => {
     const user = userEvent.setup();
-    render(<ProductCard product={product} />);
+    renderWithI18n(<ProductCard product={product} locale="pt-BR" />);
 
     await user.click(
       screen.getByRole("button", { name: /Adicionar Tênis Corrida Leve aos favoritos/ }),

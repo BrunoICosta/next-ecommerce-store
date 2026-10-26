@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    // Root-level 404 for an app with one root layout per locale (out/404.html).
+    globalNotFound: true,
+  },
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },

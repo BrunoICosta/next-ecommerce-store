@@ -23,7 +23,6 @@ export type ShippingMethodId = "pac" | "sedex";
 
 export interface ShippingOption {
   id: ShippingMethodId;
-  label: string;
   /** Price in cents. 0 means free shipping. */
   price: number;
   minDays: number;
@@ -32,7 +31,6 @@ export interface ShippingOption {
 
 export interface Coupon {
   code: string;
-  description: string;
   percentOff: number;
 }
 

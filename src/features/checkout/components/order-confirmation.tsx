@@ -4,37 +4,42 @@ import { Barcode, CheckCircle2, CreditCard, PackageSearch, Truck } from "lucide-
 
 import { ButtonLink } from "@/components/ui/button";
 import { OrderSummary } from "@/features/cart/components/order-summary";
-import { formatCep, formatDeliveryWindow } from "@/features/cart/pricing";
-import { getColor } from "@/features/catalog";
+import { formatCep } from "@/features/cart/pricing";
+import { getColor, getProductById, sizeLabel } from "@/features/catalog";
 import { ProductArt } from "@/features/catalog/components/product-art";
-import { formatPrice } from "@/lib/format";
-import { routes } from "@/lib/routes";
+import { useI18n } from "@/i18n/i18n-provider";
+import { formatDate, formatPrice } from "@/lib/format";
 
 import type { Order } from "../order";
 import { selectLastOrder, useOrdersHydrated, useOrderStore } from "../order-store";
 import { CopyButton } from "./copy-button";
 import { FakeQrCode } from "./fake-qr-code";
 
-const dateFormatter = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" });
 const BRAND_NAME = {
   visa: "Visa",
   mastercard: "Mastercard",
   amex: "American Express",
   elo: "Elo",
-  unknown: "cartão",
 } as const;
 
 function PaymentDetails({ order }: { order: Order }) {
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.order;
   const { payment } = order;
+  const total = order.totals.total;
 
   if (payment.method === "card") {
+    const brand = payment.brand === "unknown" ? t.cardFallback : BRAND_NAME[payment.brand];
     return (
       <div className="flex gap-4">
         <CreditCard className="size-6 shrink-0 text-accent" aria-hidden />
         <p>
-          Pagamento aprovado no {BRAND_NAME[payment.brand]} final <strong>{payment.last4}</strong>{" "}
-          em {payment.installments}x de{" "}
-          {formatPrice(Math.ceil(order.totals.total / payment.installments))}.
+          {t.cardApproved(
+            brand,
+            payment.last4,
+            payment.installments,
+            Math.ceil(total / payment.installments),
+          )}
         </p>
       </div>
     );
@@ -43,14 +48,15 @@ function PaymentDetails({ order }: { order: Order }) {
   if (payment.method === "pix") {
     return (
       <div className="flex flex-col gap-5 sm:flex-row">
-        <FakeQrCode value={payment.code} className="size-40 shrink-0 rounded-xl text-black" />
+        <FakeQrCode
+          value={payment.code}
+          label={t.qrLabel}
+          className="size-40 shrink-0 rounded-xl text-black"
+        />
         <div className="min-w-0 space-y-3">
-          <p>
-            Escaneie o QR Code ou use o código copia e cola. O pagamento de{" "}
-            <strong>{formatPrice(order.totals.total)}</strong> expira em 30 minutos.
-          </p>
+          <p>{t.pixInstructions(total)}</p>
           <code className="block rounded-lg bg-muted p-3 text-xs break-all">{payment.code}</code>
-          <CopyButton value={payment.code} label="Copiar código Pix" />
+          <CopyButton value={payment.code} label={t.copyPix} />
         </div>
       </div>
     );
@@ -60,13 +66,10 @@ function PaymentDetails({ order }: { order: Order }) {
     <div className="space-y-3">
       <p className="flex gap-3">
         <Barcode className="size-6 shrink-0 text-accent" aria-hidden />
-        <span>
-          Boleto de <strong>{formatPrice(order.totals.total)}</strong> com vencimento em{" "}
-          {dateFormatter.format(new Date(payment.dueDate))}.
-        </span>
+        <span>{t.boletoInstructions(total, formatDate(payment.dueDate, locale))}</span>
       </p>
       <code className="block rounded-lg bg-muted p-3 text-sm break-all">{payment.line}</code>
-      <CopyButton value={payment.line.replace(/\D/g, "")} label="Copiar linha digitável" />
+      <CopyButton value={payment.line.replace(/\D/g, "")} label={t.copyBoleto} />
     </div>
   );
 }
@@ -74,6 +77,8 @@ function PaymentDetails({ order }: { order: Order }) {
 export function OrderConfirmation() {
   const hydrated = useOrdersHydrated();
   const order = useOrderStore(selectLastOrder);
+  const { locale, t: dictionary, routes } = useI18n();
+  const t = dictionary.order;
 
   if (!hydrated) {
     return <div className="h-96 animate-pulse rounded-3xl bg-muted" aria-hidden />;
@@ -83,19 +88,16 @@ export function OrderConfirmation() {
     return (
       <div className="flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-20 text-center">
         <PackageSearch className="size-10 text-muted-foreground" aria-hidden />
-        <h1 className="mt-4 text-2xl font-semibold">Nenhum pedido recente</h1>
-        <p className="mt-2 max-w-sm text-muted-foreground">
-          Quando você finalizar uma compra, a confirmação aparece aqui.
-        </p>
+        <h1 className="mt-4 text-2xl font-semibold">{t.emptyTitle}</h1>
+        <p className="mt-2 max-w-sm text-muted-foreground">{t.emptyText}</p>
         <ButtonLink href={routes.products()} className="mt-6">
-          Ir para a loja
+          {t.goToStore}
         </ButtonLink>
       </div>
     );
   }
 
   const firstName = order.customer.fullName.split(" ")[0];
-  const placedAt = new Date(order.createdAt);
   const { address, shipping } = order;
 
   return (
@@ -105,14 +107,15 @@ export function OrderConfirmation() {
           <CheckCircle2 className="size-9 text-success" aria-hidden />
         </span>
         <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
-          {order.payment.method === "card" ? "Pedido confirmado!" : "Pedido recebido!"}
+          {order.payment.method === "card" ? t.confirmed : t.received}
         </h1>
         <p className="mt-3 max-w-lg text-muted-foreground">
-          Obrigado, {firstName}! Enviamos os detalhes para <strong>{order.customer.email}</strong>.
+          {t.thanks(firstName)}
+          <strong>{order.customer.email}</strong>.
         </p>
         <p className="mt-4 rounded-full bg-muted px-4 py-2 text-sm">
-          Pedido <strong className="font-mono">{order.id}</strong> ·{" "}
-          {dateFormatter.format(placedAt)}
+          {t.number} <strong className="font-mono">{order.id}</strong> ·{" "}
+          {formatDate(order.createdAt, locale)}
         </p>
       </header>
 
@@ -123,7 +126,7 @@ export function OrderConfirmation() {
             className="rounded-3xl border border-border bg-card p-6"
           >
             <h2 id="pagamento" className="mb-4 text-lg font-semibold">
-              Pagamento
+              {t.payment}
             </h2>
             <PaymentDetails order={order} />
           </section>
@@ -133,13 +136,14 @@ export function OrderConfirmation() {
             className="rounded-3xl border border-border bg-card p-6"
           >
             <h2 id="entrega" className="mb-4 text-lg font-semibold">
-              Entrega
+              {t.delivery}
             </h2>
             <div className="flex gap-4 text-sm">
               <Truck className="size-6 shrink-0 text-accent" aria-hidden />
               <div>
                 <p className="font-medium">
-                  {shipping.label} · {formatDeliveryWindow(shipping)}
+                  {dictionary.shipping.methods[shipping.id]} ·{" "}
+                  {dictionary.shipping.window(shipping.minDays, shipping.maxDays)}
                 </p>
                 <address className="mt-1 text-muted-foreground not-italic">
                   {address.street}, {address.number}
@@ -154,7 +158,7 @@ export function OrderConfirmation() {
 
           <section aria-labelledby="itens" className="rounded-3xl border border-border bg-card p-6">
             <h2 id="itens" className="mb-4 text-lg font-semibold">
-              Itens
+              {t.items}
             </h2>
             <ul className="divide-y divide-border">
               {order.items.map((item) => (
@@ -171,13 +175,20 @@ export function OrderConfirmation() {
                     />
                   </span>
                   <span className="flex-1">
-                    <span className="block font-medium">{item.name}</span>
+                    <span className="block font-medium">
+                      {/* Snapshot name as fallback if the product left the catalog. */}
+                      {getProductById(item.productId, locale)?.name ?? item.name}
+                    </span>
                     <span className="text-muted-foreground">
-                      {getColor(item.color).name}
-                      {item.size !== "U" && ` · Tam. ${item.size}`} · {item.quantity} un.
+                      {getColor(item.color, locale).name}
+                      {item.size !== "U" &&
+                        ` · ${dictionary.common.sizeShort(sizeLabel(item.size, locale))}`}{" "}
+                      · {dictionary.common.units(item.quantity)}
                     </span>
                   </span>
-                  <span className="font-medium">{formatPrice(item.unitPrice * item.quantity)}</span>
+                  <span className="font-medium">
+                    {formatPrice(item.unitPrice * item.quantity, locale)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -187,10 +198,10 @@ export function OrderConfirmation() {
         <OrderSummary
           totals={order.totals}
           paymentDiscount={order.totals.paymentDiscount}
-          title="Valores"
+          title={t.values}
         >
           <ButtonLink href={routes.products()} variant="secondary" className="w-full">
-            Continuar comprando
+            {t.keepShopping}
           </ButtonLink>
         </OrderSummary>
       </div>

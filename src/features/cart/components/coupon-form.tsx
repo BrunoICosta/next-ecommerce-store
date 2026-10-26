@@ -3,14 +3,18 @@
 import { TicketPercent, X } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 
-import { useCartStore } from "../store";
+import { useI18n } from "@/i18n/i18n-provider";
+
+import { useCartStore, type CouponError } from "../store";
 import type { Coupon } from "../types";
 
 export function CouponForm({ coupon }: { coupon: Coupon | null }) {
   const applyCoupon = useCartStore((state) => state.applyCoupon);
   const removeCoupon = useCartStore((state) => state.removeCoupon);
   const [code, setCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<CouponError | null>(null);
+  const { t: dictionary } = useI18n();
+  const t = dictionary.coupon;
   const inputId = useId();
   const errorId = useId();
 
@@ -31,15 +35,15 @@ export function CouponForm({ coupon }: { coupon: Coupon | null }) {
         <span className="flex items-center gap-2">
           <TicketPercent className="size-4 text-success" aria-hidden />
           <span>
-            <strong>{coupon.code}</strong> aplicado
-            <span className="block text-muted-foreground">{coupon.description}</span>
+            <strong>{coupon.code}</strong> {t.applied}
+            <span className="block text-muted-foreground">{t.description}</span>
           </span>
         </span>
         <button
           type="button"
           onClick={removeCoupon}
           className="inline-flex size-8 items-center justify-center rounded-full hover:bg-muted"
-          aria-label={`Remover cupom ${coupon.code}`}
+          aria-label={t.remove(coupon.code)}
         >
           <X className="size-4" aria-hidden />
         </button>
@@ -51,13 +55,13 @@ export function CouponForm({ coupon }: { coupon: Coupon | null }) {
     <div className="space-y-2">
       <form onSubmit={handleSubmit} className="flex gap-2" noValidate>
         <label htmlFor={inputId} className="sr-only">
-          Cupom de desconto
+          {t.label}
         </label>
         <input
           id={inputId}
           value={code}
           onChange={(event) => setCode(event.target.value.toUpperCase())}
-          placeholder="Cupom de desconto"
+          placeholder={t.placeholder}
           autoComplete="off"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
@@ -67,16 +71,18 @@ export function CouponForm({ coupon }: { coupon: Coupon | null }) {
           type="submit"
           className="h-10 rounded-lg border border-border px-4 text-sm font-semibold hover:border-foreground"
         >
-          Aplicar
+          {t.apply}
         </button>
       </form>
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-danger">
-          {error}
+          {t.errors[error]}
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Primeira compra? Use <strong>BEMVINDO10</strong> e ganhe 10% off.
+          {t.hint[0]}
+          <strong>{t.hint[1]}</strong>
+          {t.hint[2]}
         </p>
       )}
     </div>

@@ -2,12 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight } from "lucide-react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/form-field";
+import { useI18n } from "@/i18n/i18n-provider";
 
-import { customerSchema, type CustomerData } from "../schemas";
+import { createCustomerSchema, type CustomerData } from "../schemas";
 import { maskCpf, maskPhone } from "../validators";
 
 interface CustomerStepProps {
@@ -18,12 +20,15 @@ interface CustomerStepProps {
 const EMPTY: CustomerData = { fullName: "", email: "", cpf: "", phone: "" };
 
 export function CustomerStep({ defaultValues, onSubmit }: CustomerStepProps) {
+  const { t: dictionary } = useI18n();
+  const t = dictionary.checkout.customer;
+  const schema = useMemo(() => createCustomerSchema(dictionary.validation), [dictionary]);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<CustomerData>({
-    resolver: zodResolver(customerSchema),
+    resolver: zodResolver(schema),
     defaultValues: defaultValues ?? EMPTY,
     mode: "onTouched",
   });
@@ -31,22 +36,20 @@ export function CustomerStep({ defaultValues, onSubmit }: CustomerStepProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Seus dados</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Usamos estas informações para emitir a nota fiscal e enviar atualizações do pedido.
-        </p>
+        <h2 className="text-xl font-semibold">{t.title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
-          label="Nome completo"
+          label={t.fullName}
           autoComplete="name"
           containerClassName="sm:col-span-2"
           error={errors.fullName?.message}
           {...register("fullName")}
         />
         <TextField
-          label="E-mail"
+          label={t.email}
           type="email"
           autoComplete="email"
           containerClassName="sm:col-span-2"
@@ -54,10 +57,10 @@ export function CustomerStep({ defaultValues, onSubmit }: CustomerStepProps) {
           {...register("email")}
         />
         <TextField
-          label="CPF"
+          label={t.cpf}
           inputMode="numeric"
           placeholder="000.000.000-00"
-          hint="Dica para testar: 529.982.247-25"
+          hint={t.cpfHint}
           error={errors.cpf?.message}
           {...register("cpf", {
             setValueAs: maskCpf,
@@ -67,11 +70,11 @@ export function CustomerStep({ defaultValues, onSubmit }: CustomerStepProps) {
           })}
         />
         <TextField
-          label="Celular"
+          label={t.phone}
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          placeholder="(11) 91234-5678"
+          placeholder={t.phonePlaceholder}
           error={errors.phone?.message}
           {...register("phone", {
             setValueAs: maskPhone,
@@ -84,7 +87,7 @@ export function CustomerStep({ defaultValues, onSubmit }: CustomerStepProps) {
 
       <div className="flex justify-end">
         <Button type="submit" size="lg">
-          Continuar para entrega
+          {t.next}
           <ArrowRight className="size-4" aria-hidden />
         </Button>
       </div>

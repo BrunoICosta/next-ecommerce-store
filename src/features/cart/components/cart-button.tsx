@@ -2,6 +2,8 @@
 
 import { ShoppingBag } from "lucide-react";
 
+import { useI18n } from "@/i18n/i18n-provider";
+
 import { useCartHydrated } from "../hooks";
 import { selectItemCount, useCartStore } from "../store";
 
@@ -10,13 +12,14 @@ export function CartButton() {
   const count = useCartStore(selectItemCount);
   const openDrawer = useCartStore((state) => state.openDrawer);
   const visibleCount = hydrated ? count : 0;
+  const { t } = useI18n();
 
   return (
     <button
       type="button"
       onClick={openDrawer}
       className="relative inline-flex size-10 items-center justify-center rounded-full hover:bg-muted"
-      aria-label={visibleCount > 0 ? `Abrir carrinho, ${visibleCount} itens` : "Abrir carrinho"}
+      aria-label={visibleCount > 0 ? t.cart.openWithCount(visibleCount) : t.cart.open}
     >
       <ShoppingBag className="size-5" aria-hidden />
       {visibleCount > 0 && (

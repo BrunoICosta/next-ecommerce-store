@@ -3,8 +3,8 @@
 import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { formatInstallments } from "@/lib/format";
-import { routes } from "@/lib/routes";
+import { useI18n } from "@/i18n/i18n-provider";
+import { maxInstallments } from "@/lib/format";
 
 import { useCart, useCartHydrated } from "../hooks";
 import { useCartStore } from "../store";
@@ -31,6 +31,8 @@ export function CartView() {
   const hydrated = useCartHydrated();
   const { lines, totals, coupon } = useCart();
   const clear = useCartStore((state) => state.clear);
+  const { t: dictionary, routes } = useI18n();
+  const t = dictionary.cart;
 
   if (!hydrated) return <CartSkeleton />;
 
@@ -40,12 +42,10 @@ export function CartView() {
         <span className="flex size-16 items-center justify-center rounded-full bg-muted">
           <ShoppingBag className="size-7 text-muted-foreground" aria-hidden />
         </span>
-        <h2 className="mt-4 text-xl font-semibold">Seu carrinho está vazio</h2>
-        <p className="mt-2 max-w-sm text-muted-foreground">
-          Explore o catálogo e adicione seus favoritos. Eles ficam salvos neste navegador.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold">{t.emptyTitle}</h2>
+        <p className="mt-2 max-w-sm text-muted-foreground">{t.emptyText}</p>
         <ButtonLink href={routes.products()} className="mt-6">
-          Ver produtos
+          {t.seeProducts}
         </ButtonLink>
       </div>
     );
@@ -58,14 +58,14 @@ export function CartView() {
       <section aria-labelledby="itens-carrinho">
         <div className="flex items-center justify-between">
           <h2 id="itens-carrinho" className="text-lg font-semibold">
-            Itens ({totals.itemCount})
+            {t.itemsHeading(totals.itemCount)}
           </h2>
           <button
             type="button"
             onClick={clear}
             className="text-sm text-muted-foreground underline-offset-4 hover:text-danger hover:underline"
           >
-            Esvaziar carrinho
+            {t.clear}
           </button>
         </div>
         <ul className="mt-4 divide-y divide-border border-y border-border">
@@ -87,11 +87,14 @@ export function CartView() {
             <CouponForm coupon={coupon} />
           </div>
           <ButtonLink href={routes.checkout} size="lg" className="w-full">
-            Finalizar compra
+            {t.checkout}
             <ArrowRight className="size-4" aria-hidden />
           </ButtonLink>
           <p className="text-center text-xs text-muted-foreground">
-            Em até {formatInstallments(totals.total)} ou 5% off no Pix
+            {t.installmentsHint(
+              maxInstallments(totals.total),
+              Math.ceil(totals.total / maxInstallments(totals.total)),
+            )}
           </p>
         </OrderSummary>
       </div>

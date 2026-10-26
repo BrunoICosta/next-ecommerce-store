@@ -1,10 +1,6 @@
 export const siteConfig = {
   name: "Trama",
-  title: "Trama — roupas, tênis e acessórios",
-  description:
-    "Loja de moda casual com camisetas, moletons, calças, tênis e acessórios. Frete grátis acima de R$ 299 e troca fácil em até 30 dias.",
   url: "https://brunoicosta.github.io/next-ecommerce-store",
-  locale: "pt_BR",
   author: {
     name: "Bruno Vinicius Isaac Costa",
     url: "https://github.com/BrunoICosta",

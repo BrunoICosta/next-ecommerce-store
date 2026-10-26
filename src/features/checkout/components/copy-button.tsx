@@ -4,9 +4,11 @@ import { Check, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/i18n-provider";
 
 export function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!copied) return;
@@ -30,7 +32,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
       ) : (
         <Copy className="size-4" aria-hidden />
       )}
-      {copied ? "Copiado!" : label}
+      {copied ? t.order.copied : label}
     </Button>
   );
 }

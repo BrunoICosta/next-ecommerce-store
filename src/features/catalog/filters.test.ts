@@ -11,7 +11,7 @@ import {
 } from "./filters";
 
 const withFilters = (patch: Partial<CatalogFilters>) =>
-  filterProducts(products, { ...DEFAULT_FILTERS, ...patch });
+  filterProducts(products, { ...DEFAULT_FILTERS, ...patch }, "pt-BR");
 
 describe("normalizeText", () => {
   it("lowercases and removes accents", () => {

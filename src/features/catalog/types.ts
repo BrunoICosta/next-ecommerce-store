@@ -22,6 +22,14 @@ export type ApparelSize = "PP" | "P" | "M" | "G" | "GG";
 export type ShoeSize = "37" | "38" | "39" | "40" | "41" | "42" | "43" | "44";
 export type Size = ApparelSize | ShoeSize | "U";
 
+/** Translatable marketing copy of a product. */
+export interface ProductText {
+  name: string;
+  tagline: string;
+  description: string;
+  features: string[];
+}
+
 export interface Product {
   id: string;
   slug: string;

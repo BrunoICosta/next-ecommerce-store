@@ -1,27 +1,36 @@
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
+import { defaultLocale, intlLocale, type Locale } from "@/i18n/config";
 
-/** Formats a value in cents as BRL, e.g. 12990 -> "R$ 129,90". */
-export function formatPrice(cents: number): string {
-  return currencyFormatter.format(cents / 100);
+const currencyFormatters = new Map<Locale, Intl.NumberFormat>();
+
+/**
+ * Formats a value in cents as BRL using the active locale:
+ * 12990 -> "R$ 129,90" (pt-BR) or "R$129.90" (en). The currency never changes.
+ */
+export function formatPrice(cents: number, locale: Locale = defaultLocale): string {
+  let formatter = currencyFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(intlLocale[locale], { style: "currency", currency: "BRL" });
+    currencyFormatters.set(locale, formatter);
+  }
+  return formatter.format(cents / 100);
 }
 
-export function formatInstallments(
-  cents: number,
-  maxInstallments = 6,
-  minInstallment = 2000,
+export function formatRating(rating: number, locale: Locale = defaultLocale): string {
+  return rating.toLocaleString(intlLocale[locale], {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+}
+
+export function formatDate(
+  value: Date | string,
+  locale: Locale = defaultLocale,
+  options: Intl.DateTimeFormatOptions = { dateStyle: "long" },
 ): string {
-  const installments = Math.max(1, Math.min(maxInstallments, Math.floor(cents / minInstallment)));
-  if (installments === 1) return "à vista";
-  return `${installments}x de ${formatPrice(Math.ceil(cents / installments))} sem juros`;
+  return new Intl.DateTimeFormat(intlLocale[locale], options).format(new Date(value));
 }
 
-export function formatRating(rating: number): string {
-  return rating.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
-
-export function pluralize(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`;
+/** Number of interest-free installments offered for an amount (min. R$ 20 each). */
+export function maxInstallments(cents: number, max = 6, minInstallment = 2000): number {
+  return Math.max(1, Math.min(max, Math.floor(cents / minInstallment)));
 }

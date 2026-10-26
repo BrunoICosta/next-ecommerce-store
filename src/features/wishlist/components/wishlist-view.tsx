@@ -5,8 +5,7 @@ import { Heart } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { getProductById, type Product } from "@/features/catalog";
 import { ProductGrid } from "@/features/catalog/components/product-grid";
-import { pluralize } from "@/lib/format";
-import { routes } from "@/lib/routes";
+import { useI18n } from "@/i18n/i18n-provider";
 
 import { useWishlistHydrated, useWishlistStore } from "../store";
 
@@ -14,6 +13,8 @@ export function WishlistView() {
   const hydrated = useWishlistHydrated();
   const productIds = useWishlistStore((state) => state.productIds);
   const clear = useWishlistStore((state) => state.clear);
+  const { locale, t: dictionary, routes } = useI18n();
+  const t = dictionary.wishlist;
 
   if (!hydrated) {
     return (
@@ -26,7 +27,7 @@ export function WishlistView() {
   }
 
   const products = productIds
-    .map((id) => getProductById(id))
+    .map((id) => getProductById(id, locale))
     .filter((product): product is Product => product !== undefined);
 
   if (products.length === 0) {
@@ -35,12 +36,10 @@ export function WishlistView() {
         <span className="flex size-16 items-center justify-center rounded-full bg-muted">
           <Heart className="size-7 text-muted-foreground" aria-hidden />
         </span>
-        <h2 className="mt-4 text-xl font-semibold">Nenhum favorito ainda</h2>
-        <p className="mt-2 max-w-sm text-muted-foreground">
-          Toque no coração dos produtos para salvá-los aqui e comprar depois.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold">{t.emptyTitle}</h2>
+        <p className="mt-2 max-w-sm text-muted-foreground">{t.emptyText}</p>
         <ButtonLink href={routes.products()} className="mt-6">
-          Descobrir produtos
+          {t.discover}
         </ButtonLink>
       </div>
     );
@@ -49,18 +48,16 @@ export function WishlistView() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-muted-foreground">
-          {pluralize(products.length, "produto salvo", "produtos salvos")}
-        </p>
+        <p className="text-muted-foreground">{t.savedCount(products.length)}</p>
         <button
           type="button"
           onClick={clear}
           className="text-sm text-muted-foreground underline-offset-4 hover:text-danger hover:underline"
         >
-          Limpar favoritos
+          {t.clear}
         </button>
       </div>
-      <ProductGrid products={products} />
+      <ProductGrid products={products} locale={locale} />
     </div>
   );
 }

@@ -5,7 +5,8 @@ import type { CartItem } from "@/features/cart/types";
 
 import { calculatePaymentDiscount, createOrder, getInstallmentOptions } from "./order";
 import type { AddressData, CustomerData, PaymentData } from "./schemas";
-import { paymentSchema } from "./schemas";
+import { createPaymentSchema } from "./schemas";
+import { ptBR } from "@/i18n/dictionaries/pt-BR";
 
 const items: CartItem[] = [
   { key: "p001:preto:M", productId: "p001", color: "preto", size: "M", quantity: 2 },
@@ -36,7 +37,8 @@ const card: PaymentData = {
 };
 
 const totals = calculateTotals({ items, coupon: null, cep: address.cep, shippingMethod: "pac" });
-const lines = resolveCartLines(items);
+const lines = resolveCartLines(items, "pt-BR");
+const paymentSchema = createPaymentSchema(ptBR.validation);
 const fixedRandom = () => 0.5;
 
 describe("getInstallmentOptions", () => {

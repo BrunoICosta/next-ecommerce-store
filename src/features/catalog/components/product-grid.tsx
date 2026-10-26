@@ -1,18 +1,20 @@
+import type { Locale } from "@/i18n/config";
 import { cn } from "@/lib/cn";
 
 import { getNewArrivals } from "../queries";
 import type { ColorId, Product } from "../types";
 import { ProductCard } from "./product-card";
 
-const newArrivalIds = new Set(getNewArrivals(6).map((product) => product.id));
+const newArrivalIds = new Set(getNewArrivals("pt-BR", 6).map((product) => product.id));
 
 interface ProductGridProps {
   products: Product[];
   preferredColors?: ColorId[];
   className?: string;
+  locale: Locale;
 }
 
-export function ProductGrid({ products, preferredColors, className }: ProductGridProps) {
+export function ProductGrid({ products, preferredColors, className, locale }: ProductGridProps) {
   return (
     <ul
       className={cn(
@@ -26,6 +28,7 @@ export function ProductGrid({ products, preferredColors, className }: ProductGri
             product={product}
             isNew={newArrivalIds.has(product.id)}
             preferredColors={preferredColors}
+            locale={locale}
           />
         </li>
       ))}

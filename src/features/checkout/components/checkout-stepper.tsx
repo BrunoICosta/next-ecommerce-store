@@ -1,14 +1,13 @@
+"use client";
+
 import { Check } from "lucide-react";
 
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
 import type { CheckoutStep } from "../store";
 
-const STEPS: { step: CheckoutStep; label: string }[] = [
-  { step: 1, label: "Dados" },
-  { step: 2, label: "Entrega" },
-  { step: 3, label: "Pagamento" },
-];
+const STEPS: CheckoutStep[] = [1, 2, 3];
 
 interface CheckoutStepperProps {
   current: CheckoutStep;
@@ -17,10 +16,13 @@ interface CheckoutStepperProps {
 }
 
 export function CheckoutStepper({ current, onSelect }: CheckoutStepperProps) {
+  const { t: dictionary } = useI18n();
+  const t = dictionary.checkout;
   return (
-    <nav aria-label="Etapas do checkout">
+    <nav aria-label={t.steps}>
       <ol className="flex items-center gap-2 sm:gap-4">
-        {STEPS.map(({ step, label }, index) => {
+        {STEPS.map((step, index) => {
+          const label = t.stepLabels[index];
           const done = step < current;
           const active = step === current;
           return (
@@ -44,7 +46,7 @@ export function CheckoutStepper({ current, onSelect }: CheckoutStepperProps) {
                 </span>
                 <span className={cn(!active && !done && "text-muted-foreground")}>
                   {label}
-                  {done && <span className="sr-only"> (concluída)</span>}
+                  {done && <span className="sr-only">{t.stepDone}</span>}
                 </span>
               </button>
               {index < STEPS.length - 1 && (

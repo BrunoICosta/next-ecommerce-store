@@ -5,8 +5,8 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
-import { pluralize } from "@/lib/format";
 
 import { countActiveFilters, filterProducts, SORT_OPTIONS, type SortOption } from "../filters";
 import { useCatalogFilters } from "../hooks/use-catalog-filters";
@@ -16,15 +16,19 @@ import { CatalogSearch } from "./catalog-search";
 import { FilterPanel } from "./filter-panel";
 import { ProductGrid } from "./product-grid";
 
-const allProducts = getAllProducts();
 const categoryCounts = getCategoryCounts();
 
 export function CatalogView() {
   const { filters, updateFilters, clearFilters, isPending } = useCatalogFilters();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.catalog;
 
   const deferredFilters = useDeferredValue(filters);
-  const results = useMemo(() => filterProducts(allProducts, deferredFilters), [deferredFilters]);
+  const results = useMemo(
+    () => filterProducts(getAllProducts(locale), deferredFilters, locale),
+    [deferredFilters, locale],
+  );
   const activeCount = countActiveFilters(filters);
 
   const panel = (
@@ -33,7 +37,7 @@ export function CatalogView() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-      <aside className="hidden lg:block" aria-label="Filtros">
+      <aside className="hidden lg:block" aria-label={t.filters}>
         {panel}
       </aside>
 
@@ -48,18 +52,18 @@ export function CatalogView() {
               onClick={() => setMobileFiltersOpen(true)}
             >
               <SlidersHorizontal className="size-4" aria-hidden />
-              Filtros{activeCount > 0 && ` (${activeCount})`}
+              {activeCount > 0 ? t.filtersWithCount(activeCount) : t.filters}
             </Button>
             <label className="flex items-center gap-2 text-sm">
-              <span className="sr-only text-muted-foreground sm:not-sr-only">Ordenar por</span>
+              <span className="sr-only text-muted-foreground sm:not-sr-only">{t.sortBy}</span>
               <select
                 value={filters.sort}
                 onChange={(event) => updateFilters({ sort: event.target.value as SortOption })}
                 className="h-9 rounded-full border border-border bg-card px-3 text-sm font-medium"
               >
                 {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                  <option key={option} value={option}>
+                    {t.sort[option]}
                   </option>
                 ))}
               </select>
@@ -69,7 +73,7 @@ export function CatalogView() {
 
         <div className="mt-4 flex flex-col gap-3">
           <p className="text-sm text-muted-foreground" aria-live="polite">
-            {pluralize(results.length, "produto encontrado", "produtos encontrados")}
+            {t.found(results.length)}
           </p>
           <ActiveFilters filters={filters} onChange={updateFilters} onClear={clearFilters} />
         </div>
@@ -78,17 +82,16 @@ export function CatalogView() {
           <ProductGrid
             products={results}
             preferredColors={filters.colors}
+            locale={locale}
             className={cn("mt-6 transition-opacity", isPending && "opacity-70")}
           />
         ) : (
           <div className="mt-10 flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-16 text-center">
             <SearchX className="size-10 text-muted-foreground" aria-hidden />
-            <h2 className="mt-4 text-lg font-semibold">Nenhum produto encontrado</h2>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              Tente remover alguns filtros ou buscar por outro termo.
-            </p>
+            <h2 className="mt-4 text-lg font-semibold">{t.emptyTitle}</h2>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">{t.emptyText}</p>
             <Button className="mt-6" onClick={clearFilters}>
-              Limpar filtros
+              {t.clearFilters}
             </Button>
           </div>
         )}
@@ -97,11 +100,11 @@ export function CatalogView() {
       <Sheet
         open={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        title="Filtros"
+        title={t.filters}
         side="left"
         footer={
           <Button className="w-full" onClick={() => setMobileFiltersOpen(false)}>
-            Ver {pluralize(results.length, "produto", "produtos")}
+            {t.showResults(results.length)}
           </Button>
         }
       >

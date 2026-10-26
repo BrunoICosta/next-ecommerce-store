@@ -1,25 +1,37 @@
 import type { MetadataRoute } from "next";
 
 import { getAllProducts } from "@/features/catalog";
-import { routes } from "@/lib/routes";
+import { locales, type Locale } from "@/i18n/config";
+import { createRoutes } from "@/lib/routes";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
 
-/** Generated at build time into out/sitemap.xml. */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date("2026-10-15");
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: absoluteUrl(routes.home), lastModified, changeFrequency: "weekly", priority: 1 },
-    { url: absoluteUrl(routes.products()), lastModified, changeFrequency: "daily", priority: 0.9 },
-  ];
+const lastModified = new Date("2026-10-28");
 
-  const productPages: MetadataRoute.Sitemap = getAllProducts().map((product) => ({
-    url: absoluteUrl(routes.product(product.slug)),
+/** Same page in every language, each entry listing its hreflang alternates. */
+function localizedEntry(
+  path: (locale: Locale) => string,
+  changeFrequency: "daily" | "weekly",
+  priority: number,
+): MetadataRoute.Sitemap {
+  const languages = Object.fromEntries(locales.map((code) => [code, absoluteUrl(path(code))]));
+  return locales.map((locale) => ({
+    url: absoluteUrl(path(locale)),
     lastModified,
-    changeFrequency: "weekly",
-    priority: 0.8,
+    changeFrequency,
+    priority,
+    alternates: { languages },
   }));
+}
 
-  return [...staticPages, ...productPages];
+/** Generated at build time into out/sitemap.xml, covering pt-BR and en. */
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    ...localizedEntry((locale) => createRoutes(locale).home, "weekly", 1),
+    ...localizedEntry((locale) => createRoutes(locale).products(), "daily", 0.9),
+    ...getAllProducts("pt-BR").flatMap((product) =>
+      localizedEntry((locale) => createRoutes(locale).product(product.slug), "weekly", 0.8),
+    ),
+  ];
 }

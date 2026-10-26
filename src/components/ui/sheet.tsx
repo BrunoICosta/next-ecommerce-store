@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
 interface SheetProps {
@@ -21,6 +22,7 @@ interface SheetProps {
 export function Sheet({ open, onClose, title, side = "right", children, footer }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  const { t } = useI18n();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -64,7 +66,7 @@ export function Sheet({ open, onClose, title, side = "right", children, footer }
               type="button"
               onClick={onClose}
               className="inline-flex size-9 items-center justify-center rounded-full hover:bg-muted"
-              aria-label="Fechar"
+              aria-label={t.common.close}
             >
               <X className="size-5" aria-hidden />
             </button>

@@ -1,7 +1,8 @@
 "use client";
 
 import type { ColorId, Size } from "@/features/catalog";
-import { getColor } from "@/features/catalog";
+import { getColor, sizeLabel } from "@/features/catalog";
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
 interface ColorSelectorProps {
@@ -11,14 +12,16 @@ interface ColorSelectorProps {
 }
 
 export function ColorSelector({ colors, value, onChange }: ColorSelectorProps) {
+  const { locale, t } = useI18n();
   return (
     <fieldset>
       <legend className="text-sm font-semibold">
-        Cor: <span className="font-normal text-muted-foreground">{getColor(value).name}</span>
+        {t.product.color}:{" "}
+        <span className="font-normal text-muted-foreground">{getColor(value, locale).name}</span>
       </legend>
       <div className="mt-3 flex flex-wrap gap-3">
         {colors.map((colorId) => {
-          const color = getColor(colorId);
+          const color = getColor(colorId, locale);
           const checked = colorId === value;
           return (
             <label key={colorId} className="cursor-pointer" title={color.name}>
@@ -55,15 +58,18 @@ interface SizeSelectorProps {
 }
 
 export function SizeSelector({ sizes, value, onChange, error }: SizeSelectorProps) {
+  const { locale, t } = useI18n();
   if (sizes.length === 1 && sizes[0] === "U") {
-    return <p className="text-sm text-muted-foreground">Tamanho único</p>;
+    return <p className="text-sm text-muted-foreground">{t.common.oneSize}</p>;
   }
 
   return (
     <fieldset aria-describedby={error ? "size-error" : undefined}>
       <legend className="text-sm font-semibold">
-        Tamanho
-        {value && <span className="font-normal text-muted-foreground">: {value}</span>}
+        {t.product.size}
+        {value && (
+          <span className="font-normal text-muted-foreground">: {sizeLabel(value, locale)}</span>
+        )}
       </legend>
       <div className="mt-3 flex flex-wrap gap-2">
         {sizes.map((size) => {
@@ -86,7 +92,7 @@ export function SizeSelector({ sizes, value, onChange, error }: SizeSelectorProp
                     : "border-border hover:border-foreground",
                 )}
               >
-                {size}
+                {sizeLabel(size, locale)}
               </span>
             </label>
           );

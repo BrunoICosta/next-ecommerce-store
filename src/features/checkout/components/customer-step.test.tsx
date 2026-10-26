@@ -1,14 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CustomerStep } from "./customer-step";
 
+import { renderWithI18n } from "@/test/render";
+
 describe("CustomerStep", () => {
   it("shows validation errors and does not submit invalid data", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
-    render(<CustomerStep defaultValues={null} onSubmit={onSubmit} />);
+    renderWithI18n(<CustomerStep defaultValues={null} onSubmit={onSubmit} />);
 
     await user.type(screen.getByLabelText("Nome completo"), "Maria");
     await user.type(screen.getByLabelText("E-mail"), "maria@");
@@ -25,7 +27,7 @@ describe("CustomerStep", () => {
   it("masks inputs and submits valid data", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
-    render(<CustomerStep defaultValues={null} onSubmit={onSubmit} />);
+    renderWithI18n(<CustomerStep defaultValues={null} onSubmit={onSubmit} />);
 
     await user.type(screen.getByLabelText("Nome completo"), "Maria Souza");
     await user.type(screen.getByLabelText("E-mail"), "maria@example.com");

@@ -6,7 +6,9 @@ import type { ColorId, Size } from "@/features/catalog";
 import { cartItemKey, findCoupon, isValidCep, MAX_QUANTITY_PER_ITEM, sanitizeCep } from "./pricing";
 import type { CartItem, ShippingMethodId } from "./types";
 
-export type CouponResult = { ok: true } | { ok: false; error: string };
+/** Error codes are translated by the UI. */
+export type CouponError = "empty" | "invalid";
+export type CouponResult = { ok: true } | { ok: false; error: CouponError };
 
 interface CartState {
   items: CartItem[];
@@ -74,9 +76,9 @@ export const useCartStore = create<CartStore>()(
       clear: () => set({ items: [], couponCode: null }),
 
       applyCoupon: (code) => {
-        if (!code.trim()) return { ok: false, error: "Digite um cupom." };
+        if (!code.trim()) return { ok: false, error: "empty" };
         const coupon = findCoupon(code);
-        if (!coupon) return { ok: false, error: "Cupom inválido ou expirado." };
+        if (!coupon) return { ok: false, error: "invalid" };
         set({ couponCode: coupon.code });
         return { ok: true };
       },

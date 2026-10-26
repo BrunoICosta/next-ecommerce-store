@@ -45,8 +45,8 @@ describe("cart store", () => {
 
   it("validates coupons", () => {
     const { applyCoupon } = useCartStore.getState();
-    expect(applyCoupon("")).toEqual({ ok: false, error: "Digite um cupom." });
-    expect(applyCoupon("NATAL50")).toMatchObject({ ok: false });
+    expect(applyCoupon("")).toEqual({ ok: false, error: "empty" });
+    expect(applyCoupon("NATAL50")).toEqual({ ok: false, error: "invalid" });
     expect(applyCoupon("bemvindo10")).toEqual({ ok: true });
     expect(useCartStore.getState().couponCode).toBe("BEMVINDO10");
   });

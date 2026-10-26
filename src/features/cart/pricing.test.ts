@@ -64,10 +64,10 @@ describe("quoteShipping", () => {
 
 describe("resolveCartLines", () => {
   it("joins items with catalog data and drops unknown products", () => {
-    const lines = resolveCartLines([
-      tshirt,
-      { key: "x", productId: "nope", color: "preto", size: "M", quantity: 1 },
-    ]);
+    const lines = resolveCartLines(
+      [tshirt, { key: "x", productId: "nope", color: "preto", size: "M", quantity: 1 }],
+      "pt-BR",
+    );
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatchObject({ unitPrice: 12_990, lineTotal: 25_980 });
   });

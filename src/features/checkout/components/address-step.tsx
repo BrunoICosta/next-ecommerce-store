@@ -2,30 +2,25 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { SelectField, TextField } from "@/components/ui/form-field";
-import {
-  formatCep,
-  formatDeliveryWindow,
-  isValidCep,
-  quoteShipping,
-  sanitizeCep,
-} from "@/features/cart/pricing";
+import { formatCep, isValidCep, quoteShipping, sanitizeCep } from "@/features/cart/pricing";
 import { useCartStore } from "@/features/cart/store";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/i18n-provider";
 import { formatPrice } from "@/lib/format";
 
-import { addressSchema, BRAZILIAN_STATES, type AddressData } from "../schemas";
+import { BRAZILIAN_STATES, createAddressSchema, type AddressData } from "../schemas";
 import { CepNotFoundError, fetchAddressByCep } from "../viacep";
 
 type LookupState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "found" }
-  | { status: "error"; message: string };
+  | { status: "error"; reason: "notFound" | "failed" };
 
 interface AddressStepProps {
   defaultValues: AddressData | null;
@@ -44,6 +39,9 @@ export function AddressStep({
   const cartMethod = useCartStore((state) => state.shippingMethod);
   const setCep = useCartStore((state) => state.setCep);
   const setShippingMethod = useCartStore((state) => state.setShippingMethod);
+  const { locale, t: dictionary } = useI18n();
+  const t = dictionary.checkout.address;
+  const schema = useMemo(() => createAddressSchema(dictionary.validation), [dictionary]);
 
   const {
     register,
@@ -53,7 +51,7 @@ export function AddressStep({
     control,
     formState: { errors },
   } = useForm<AddressData>({
-    resolver: zodResolver(addressSchema),
+    resolver: zodResolver(schema),
     mode: "onTouched",
     defaultValues: defaultValues ?? {
       cep: cartCep ? formatCep(cartCep) : "",
@@ -102,10 +100,7 @@ export function AddressStep({
         if (controller.signal.aborted) return;
         setLookup({
           status: "error",
-          message:
-            error instanceof CepNotFoundError
-              ? "CEP não encontrado. Confira o número ou preencha o endereço manualmente."
-              : "Não foi possível consultar o CEP agora. Preencha o endereço manualmente.",
+          reason: error instanceof CepNotFoundError ? "notFound" : "failed",
         });
       });
 
@@ -124,15 +119,13 @@ export function AddressStep({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Endereço de entrega</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Digite o CEP e preenchemos o endereço para você.
-        </p>
+        <h2 className="text-xl font-semibold">{t.title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-6">
         <TextField
-          label="CEP"
+          label={t.cep}
           inputMode="numeric"
           autoComplete="postal-code"
           placeholder="00000-000"
@@ -146,7 +139,7 @@ export function AddressStep({
               rel="noreferrer"
               className="underline underline-offset-2"
             >
-              Não sei meu CEP
+              {t.unknownCep}
             </a>
           }
           {...register("cep", {
@@ -159,54 +152,56 @@ export function AddressStep({
         />
         <div className="sm:col-span-4" aria-live="polite">
           {lookup.status === "loading" && (
-            <p className="text-sm text-muted-foreground sm:mt-9">Buscando endereço…</p>
+            <p className="text-sm text-muted-foreground sm:mt-9">{t.searching}</p>
           )}
           {lookup.status === "error" && (
-            <p className="text-sm text-danger sm:mt-9">{lookup.message}</p>
+            <p className="text-sm text-danger sm:mt-9">
+              {lookup.reason === "notFound" ? t.notFound : t.lookupFailed}
+            </p>
           )}
         </div>
         <TextField
-          label="Rua"
+          label={t.street}
           autoComplete="address-line1"
           containerClassName="sm:col-span-4"
           error={errors.street?.message}
           {...register("street")}
         />
         <TextField
-          label="Número"
+          label={t.number}
           inputMode="numeric"
           containerClassName="sm:col-span-2"
           error={errors.number?.message}
           {...register("number")}
         />
         <TextField
-          label="Complemento (opcional)"
+          label={t.complement}
           autoComplete="address-line2"
           containerClassName="sm:col-span-3"
           error={errors.complement?.message}
           {...register("complement")}
         />
         <TextField
-          label="Bairro"
+          label={t.neighborhood}
           containerClassName="sm:col-span-3"
           error={errors.neighborhood?.message}
           {...register("neighborhood")}
         />
         <TextField
-          label="Cidade"
+          label={t.city}
           autoComplete="address-level2"
           containerClassName="sm:col-span-4"
           error={errors.city?.message}
           {...register("city")}
         />
         <SelectField
-          label="Estado"
+          label={t.state}
           autoComplete="address-level1"
           containerClassName="sm:col-span-2"
           error={errors.state?.message}
           {...register("state")}
         >
-          <option value="">UF</option>
+          <option value="">{t.statePlaceholder}</option>
           {BRAZILIAN_STATES.map((uf) => (
             <option key={uf} value={uf}>
               {uf}
@@ -216,7 +211,7 @@ export function AddressStep({
       </div>
 
       <fieldset>
-        <legend className="text-sm font-semibold">Forma de entrega</legend>
+        <legend className="text-sm font-semibold">{t.method}</legend>
         {options ? (
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {options.map((option) => (
@@ -236,29 +231,33 @@ export function AddressStep({
                   {...register("shippingMethod")}
                 />
                 <span className="flex-1">
-                  <span className="block font-semibold">{option.label}</span>
-                  <span className="text-muted-foreground">{formatDeliveryWindow(option)}</span>
+                  <span className="block font-semibold">
+                    {dictionary.shipping.methods[option.id]}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {dictionary.shipping.window(option.minDays, option.maxDays)}
+                  </span>
                 </span>
                 <span className={cn("font-semibold", option.price === 0 && "text-success")}>
-                  {option.price === 0 ? "Grátis" : formatPrice(option.price)}
+                  {option.price === 0
+                    ? dictionary.shipping.free
+                    : formatPrice(option.price, locale)}
                 </span>
               </label>
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Informe o CEP para ver as opções de entrega.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{t.methodHint}</p>
         )}
       </fieldset>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="ghost" size="lg" onClick={onBack}>
           <ArrowLeft className="size-4" aria-hidden />
-          Voltar
+          {dictionary.common.back}
         </Button>
         <Button type="submit" size="lg">
-          Continuar para pagamento
+          {t.next}
           <ArrowRight className="size-4" aria-hidden />
         </Button>
       </div>

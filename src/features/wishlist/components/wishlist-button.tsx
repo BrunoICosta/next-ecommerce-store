@@ -2,6 +2,7 @@
 
 import { Heart } from "lucide-react";
 
+import { useI18n } from "@/i18n/i18n-provider";
 import { cn } from "@/lib/cn";
 
 import { useWishlistHydrated, useWishlistStore } from "../store";
@@ -23,9 +24,9 @@ export function WishlistButton({
   const saved = useWishlistStore((state) => state.productIds.includes(productId));
   const toggle = useWishlistStore((state) => state.toggle);
   const active = hydrated && saved;
-  const label = active
-    ? `Remover ${productName} dos favoritos`
-    : `Adicionar ${productName} aos favoritos`;
+  const { t: dictionary } = useI18n();
+  const t = dictionary.wishlist;
+  const label = active ? t.remove(productName) : t.add(productName);
 
   if (variant === "full") {
     return (
@@ -41,7 +42,7 @@ export function WishlistButton({
         )}
       >
         <Heart className="size-5" fill={active ? "currentColor" : "none"} aria-hidden />
-        <span className="hidden sm:inline">{active ? "Salvo" : "Favoritar"}</span>
+        <span className="hidden sm:inline">{active ? t.saved : t.save}</span>
       </button>
     );
   }
@@ -52,7 +53,7 @@ export function WishlistButton({
       onClick={() => toggle(productId)}
       aria-pressed={active}
       aria-label={label}
-      title={active ? "Remover dos favoritos" : "Salvar nos favoritos"}
+      title={active ? t.removeTitle : t.addTitle}
       className={cn(
         "inline-flex size-9 items-center justify-center rounded-full bg-background/90 shadow-sm backdrop-blur transition hover:scale-110",
         active ? "text-accent" : "text-foreground",

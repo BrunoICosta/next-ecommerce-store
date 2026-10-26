@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Price } from "@/components/ui/price";
 import { Rating } from "@/components/ui/rating";
 import { WishlistButton } from "@/features/wishlist/components/wishlist-button";
-import { routes } from "@/lib/routes";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+import { createRoutes } from "@/lib/routes";
 
 import { getColor } from "../data/colors";
 import { getDiscountPercent } from "../queries";
@@ -16,9 +18,18 @@ interface ProductCardProps {
   isNew?: boolean;
   /** When the shopper filters by color, show the product in that color. */
   preferredColors?: ColorId[];
+  locale: Locale;
 }
 
-export function ProductCard({ product, isNew = false, preferredColors = [] }: ProductCardProps) {
+export function ProductCard({
+  product,
+  isNew = false,
+  preferredColors = [],
+  locale,
+}: ProductCardProps) {
+  // Plain lookups (no hooks), so the card renders in Server and Client Components alike.
+  const t = getDictionary(locale).product;
+  const routes = createRoutes(locale);
   const discount = getDiscountPercent(product);
   const coverColor =
     product.colors.find((color) => preferredColors.includes(color)) ?? product.colors[0];
@@ -29,12 +40,12 @@ export function ProductCard({ product, isNew = false, preferredColors = [] }: Pr
         <ProductArt
           category={product.category}
           color={coverColor}
-          label={`${product.name} na cor ${getColor(coverColor).name}`}
+          label={t.inColor(product.name, getColor(coverColor, locale).name)}
           className="aspect-[4/5] w-full transition duration-500 group-hover:scale-[1.03]"
         />
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
           {discount > 0 && <Badge tone="accent">-{discount}%</Badge>}
-          {isNew && <Badge>Novo</Badge>}
+          {isNew && <Badge>{t.newBadge}</Badge>}
         </div>
         <WishlistButton
           productId={product.id}
@@ -51,12 +62,17 @@ export function ProductCard({ product, isNew = false, preferredColors = [] }: Pr
             {product.name}
           </Link>
         </h3>
-        <Rating value={product.rating} count={product.reviewCount} className="text-xs" />
+        <Rating
+          value={product.rating}
+          count={product.reviewCount}
+          className="text-xs"
+          locale={locale}
+        />
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
-          <Price price={product.price} compareAtPrice={product.compareAtPrice} />
-          <ul className="flex -space-x-1" aria-label="Cores disponíveis">
+          <Price price={product.price} compareAtPrice={product.compareAtPrice} locale={locale} />
+          <ul className="flex -space-x-1" aria-label={t.availableColors}>
             {product.colors.map((colorId) => {
-              const color = getColor(colorId);
+              const color = getColor(colorId, locale);
               return (
                 <li
                   key={colorId}
