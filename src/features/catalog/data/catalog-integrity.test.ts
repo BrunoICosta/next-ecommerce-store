@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { categorySlugs } from "./categories";
 import { colorIds } from "./colors";
+import { productsEn } from "./products.en";
 import { products } from "./products";
 
 describe("catalog data", () => {
@@ -34,6 +35,16 @@ describe("catalog data", () => {
       expect(product.rating).toBeLessThanOrEqual(5);
       expect(product.colors.length).toBeGreaterThan(0);
       expect(product.sizes.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("has English copy for every product", () => {
+    for (const product of products) {
+      const english = productsEn[product.slug];
+      expect(english, product.slug).toBeDefined();
+      expect(english.name.length).toBeGreaterThan(0);
+      expect(english.description).not.toBe(product.description);
+      expect(english.features).toHaveLength(product.features.length);
     }
   });
 });
