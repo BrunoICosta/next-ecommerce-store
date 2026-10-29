@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CartButton } from "@/features/cart/components/cart-button";
 import { WishlistLink } from "@/features/wishlist/components/wishlist-link";
 import { useI18n } from "@/i18n/i18n-provider";
+import { LanguageSwitcher } from "@/i18n/language-switcher";
 
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
@@ -41,6 +42,7 @@ export function SiteHeader() {
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <SearchForm className="mr-2 hidden w-56 lg:block xl:w-72" />
+          <LanguageSwitcher className="mr-1 hidden sm:flex" />
           <ThemeToggle />
           <WishlistLink />
           <CartButton />

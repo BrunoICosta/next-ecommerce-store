@@ -6,6 +6,7 @@ import { BASE_PATH } from "@/lib/site";
 
 import { localeNames, locales } from "./config";
 import { detectBrowserLocale } from "./detect";
+import { LocaleFlag } from "./flags";
 
 export function LanguageRedirect() {
   useEffect(() => {
@@ -25,8 +26,9 @@ export function LanguageRedirect() {
               href={`${BASE_PATH}/${locale}/`}
               hrefLang={locale}
               lang={locale}
-              className="rounded-full border border-border px-4 py-2 font-medium hover:border-foreground"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 font-medium hover:border-foreground"
             >
+              <LocaleFlag locale={locale} />
               {localeNames[locale]}
             </a>
           </li>

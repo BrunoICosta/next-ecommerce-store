@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { useI18n } from "@/i18n/i18n-provider";
+import { LanguageSwitcher } from "@/i18n/language-switcher";
 
 import { getNavLinks } from "./nav-links";
 import { SearchForm } from "./search-form";
@@ -44,6 +45,7 @@ export function MobileMenu() {
           className="absolute inset-x-0 top-full animate-fade-in border-b border-border bg-background px-4 pt-4 pb-6 shadow-lg"
         >
           <SearchForm onSubmitted={close} />
+          <LanguageSwitcher className="mt-3 sm:hidden" />
           <nav aria-label={t.header.mainNav} className="mt-4">
             <ul className="flex flex-col">
               {navLinks.map((link) => (

@@ -20,7 +20,7 @@ export const ogLocale: Record<Locale, string> = {
 
 /** Language names shown in the switcher, always in their own language. */
 export const localeNames: Record<Locale, string> = {
-  "pt-BR": "Português",
+  "pt-BR": "Português (Brasil)",
   en: "English",
 };
 
