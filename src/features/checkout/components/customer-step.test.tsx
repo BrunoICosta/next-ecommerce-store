@@ -47,4 +47,16 @@ describe("CustomerStep", () => {
       phone: "(11) 91234-5678",
     });
   });
+
+  it("shows labels and validation messages in English", async () => {
+    const user = userEvent.setup();
+    renderWithI18n(<CustomerStep defaultValues={null} onSubmit={vi.fn()} />, { locale: "en" });
+
+    await user.type(screen.getByLabelText("Email"), "maria@");
+    await user.click(screen.getByRole("button", { name: /Continue to delivery/ }));
+
+    expect(await screen.findByText("Please enter your full name.")).toBeInTheDocument();
+    expect(screen.getByText("Invalid email.")).toBeInTheDocument();
+    expect(screen.getByText("Please enter your CPF.")).toBeInTheDocument();
+  });
 });
