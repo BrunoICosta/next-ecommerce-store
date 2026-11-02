@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Exported as out/404.html, which GitHub Pages serves for any unknown URL.
+ * Exported as out/404.html, which the host serves for any unknown URL.
  * It sits outside both root layouts, so it shows every language at once.
  */
 export default function GlobalNotFound() {

@@ -2,9 +2,9 @@
 
 [Português](README.md) · **English**
 
-A casual fashion store built with **Next.js 16 (App Router)**, **React 19** and **TypeScript**, published as a 100% static site on GitHub Pages. It covers a complete storefront flow: a home page rendered at build time, a catalog with URL-synced filters, statically generated product pages with SEO and Open Graph, a persisted cart, shipping quotes by CEP (Brazilian zip code), a discount code, a multi-step checkout validated with Zod + React Hook Form, address lookup on ViaCEP and an order confirmation with simulated card, Pix or boleto payment. The UI and the catalog are available in **Portuguese and English**.
+A casual fashion store built with **Next.js 16 (App Router)**, **React 19** and **TypeScript**, published as a 100% static site on Cloudflare. It covers a complete storefront flow: a home page rendered at build time, a catalog with URL-synced filters, statically generated product pages with SEO and Open Graph, a persisted cart, shipping quotes by CEP (Brazilian zip code), a discount code, a multi-step checkout validated with Zod + React Hook Form, address lookup on ViaCEP and an order confirmation with simulated card, Pix or boleto payment. The UI and the catalog are available in **Portuguese and English**.
 
-**Demo:** https://brunoicosta.github.io/next-ecommerce-store/ (redirects to `/pt-BR/` or `/en/` based on your browser language)
+**Demo:** https://portfolio.brunoisaac.dev/next-ecommerce-store/ (redirects to `/pt-BR/` or `/en/` based on your browser language)
 
 ![Trama store home page](docs/screenshot.png)
 
@@ -31,7 +31,7 @@ A casual fashion store built with **Next.js 16 (App Router)**, **React 19** and 
 
 ## Stack
 
-Next.js 16.3.5 (`output: "export"`), React 19.2.8, TypeScript 5.9 (strict), Tailwind CSS 4.3.3, Zustand 5.0.15, React Hook Form 7.88, Zod 4.6, Vitest 5.0 + Testing Library, ESLint 9, Prettier 3, GitHub Actions + GitHub Pages.
+Next.js 16.3.5 (`output: "export"`), React 19.2.8, TypeScript 5.9 (strict), Tailwind CSS 4.3.3, Zustand 5.0.15, React Hook Form 7.88, Zod 4.6, Vitest 5.0 + Testing Library, ESLint 9, Prettier 3, GitHub Actions + Cloudflare Workers static assets.
 
 ## Running locally
 
@@ -44,8 +44,13 @@ npm run lint
 npm run typecheck
 npm test
 npm run build        # static export in ./out
-npm start            # serves ./out like GitHub Pages
+npm run build:cf     # same production build used by the Cloudflare deploy
+npm start            # serves ./out under the base path
 ```
+
+## Deploy
+
+Published on Cloudflare (Workers static assets) at https://portfolio.brunoisaac.dev/next-ecommerce-store/ by the pipeline of the [portfolio](https://github.com/BrunoICosta/portfolio) repository (`npm run build:cf`, output in `out/`).
 
 See the [Portuguese README](README.md) for the full architecture notes, how this would work with SSR on Vercel, the folder structure and next steps.
 

@@ -15,7 +15,7 @@ export function generateStaticParams() {
 /**
  * Open Graph image generated at build time for each language. A route handler
  * (instead of the opengraph-image convention) keeps the ".png" extension in
- * the exported file, so GitHub Pages serves it with the right Content-Type.
+ * the exported file, so the static host serves it with the right Content-Type.
  */
 export async function GET(_request: Request, { params }: RouteContext<"/[locale]/og.png">) {
   const { locale } = await params;

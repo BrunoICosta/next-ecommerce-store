@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Trama",
-  url: "https://brunoicosta.github.io/next-ecommerce-store",
+  url: "https://portfolio.brunoisaac.dev/next-ecommerce-store",
   author: {
     name: "Bruno Vinicius Isaac Costa",
     url: "https://github.com/BrunoICosta",

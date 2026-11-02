@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cf": "next build",
     "start": "node scripts/preview.mjs",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",

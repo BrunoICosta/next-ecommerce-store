@@ -2,9 +2,9 @@
 
 **Português** · [English](README.en.md)
 
-Loja virtual de moda casual construída com **Next.js 16 (App Router)**, **React 19** e **TypeScript**, publicada como site 100% estático no GitHub Pages. O projeto cobre o fluxo completo de uma loja: vitrine renderizada no build, catálogo com filtros sincronizados com a URL, páginas de produto geradas estaticamente com SEO e Open Graph, carrinho persistido, cálculo de frete por CEP, cupom de desconto, checkout em etapas com validação (Zod + React Hook Form), consulta de endereço no ViaCEP e confirmação de pedido com cartão, Pix ou boleto simulados. A interface e o catálogo estão disponíveis em **português e inglês**.
+Loja virtual de moda casual construída com **Next.js 16 (App Router)**, **React 19** e **TypeScript**, publicada como site 100% estático na Cloudflare. O projeto cobre o fluxo completo de uma loja: vitrine renderizada no build, catálogo com filtros sincronizados com a URL, páginas de produto geradas estaticamente com SEO e Open Graph, carrinho persistido, cálculo de frete por CEP, cupom de desconto, checkout em etapas com validação (Zod + React Hook Form), consulta de endereço no ViaCEP e confirmação de pedido com cartão, Pix ou boleto simulados. A interface e o catálogo estão disponíveis em **português e inglês**.
 
-**Demo:** https://brunoicosta.github.io/next-ecommerce-store/ (redireciona para `/pt-BR/` ou `/en/` conforme o idioma do navegador)
+**Demo:** https://portfolio.brunoisaac.dev/next-ecommerce-store/ (redireciona para `/pt-BR/` ou `/en/` conforme o idioma do navegador)
 
 ![Página inicial da loja Trama](docs/screenshot.png)
 
@@ -22,7 +22,7 @@ Loja virtual de moda casual construída com **Next.js 16 (App Router)**, **React
 - **Confirmação do pedido** com número, resumo, endereço, código Pix copia e cola com QR Code ilustrativo ou linha digitável do boleto.
 - **Favoritos** persistidos com contador no cabeçalho.
 - **Dois idiomas (pt-BR e en)** com rotas `/pt-BR/...` e `/en/...`, seletor de idioma com bandeiras no cabeçalho, nomes e descrições dos produtos traduzidos, `hreflang` nos metadados e no sitemap.
-- **Estados de interface:** `loading.tsx` com skeletons, `global-not-found.tsx` (vira o `404.html` bilíngue do Pages), `error.tsx`, estados vazios e de carregamento em cada tela.
+- **Estados de interface:** `loading.tsx` com skeletons, `global-not-found.tsx` (vira o `404.html` bilíngue servido para URLs desconhecidas), `error.tsx`, estados vazios e de carregamento em cada tela.
 - **Acessibilidade e UX:** HTML semântico, rótulos e mensagens de erro ligados aos campos (`aria-invalid`, `aria-describedby`), gaveta com `<dialog>` nativo (foco preso e Esc), link "pular para o conteúdo", foco visível, `prefers-reduced-motion`, layout mobile first e **tema escuro** sem flash na primeira pintura.
 
 ## Stack
@@ -36,17 +36,17 @@ Loja virtual de moda casual construída com **Next.js 16 (App Router)**, **React
 | Formulários | React Hook Form 7.88 + Zod 4.6 (`@hookform/resolvers` 5.9)          |
 | Testes      | Vitest 5.0, Testing Library (React 16.3, user-event 14.6), jsdom 30 |
 | Qualidade   | ESLint 9 (`eslint-config-next`), Prettier 3 com plugin do Tailwind  |
-| CI/CD       | GitHub Actions + GitHub Pages                                       |
+| CI/CD       | GitHub Actions (CI) + Cloudflare Workers static assets (deploy)     |
 | API externa | [ViaCEP](https://viacep.com.br) (pública, sem chave)                |
 
 ## Arquitetura e decisões
 
-- **Exportação estática para o GitHub Pages.** `output: "export"`, `basePath: "/next-ecommerce-store"`, `trailingSlash: true` (cada rota vira `pasta/index.html`) e `images.unoptimized`. Sem servidor em produção não existem Server Actions, Route Handlers dinâmicos nem leitura de `searchParams` no servidor, e o projeto foi desenhado em torno disso:
+- **Exportação estática para hospedagem estática.** `output: "export"`, `basePath: "/next-ecommerce-store"`, `trailingSlash: true` (cada rota vira `pasta/index.html`) e `images.unoptimized`. Sem servidor em produção não existem Server Actions, Route Handlers dinâmicos nem leitura de `searchParams` no servidor, e o projeto foi desenhado em torno disso:
   - o que é conteúdo (home, produtos, metadados, sitemap, imagens OG) é gerado no build;
   - o que depende do usuário (filtros, carrinho, checkout, pedido) roda no cliente;
   - a página de catálogo usa `useSearchParams` dentro de `Suspense`, cujo fallback já é uma grade real pré-renderizada, então o HTML exportado não chega vazio.
 - **Imagens de produto em SVG gerado.** Cada categoria tem uma silhueta vetorial colorida pela paleta da variante. Não há dependência de banco de imagens nem requisições extras, a demo não quebra e a troca de cor é instantânea. As mesmas peças são renderizadas pelo Satori (`next/og`) para criar as imagens Open Graph em PNG.
-- **Imagens OG via Route Handler `og.png`.** A convenção `opengraph-image` exporta arquivos sem extensão, que o Pages serviria como `application/octet-stream`. Route Handlers `force-static` em pastas `og.png` mantêm a extensão e o `Content-Type` correto.
+- **Imagens OG via Route Handler `og.png`.** A convenção `opengraph-image` exporta arquivos sem extensão, que um host estático serviria como `application/octet-stream`. Route Handlers `force-static` em pastas `og.png` mantêm a extensão e o `Content-Type` correto.
 - **Preços em centavos (inteiros)** para evitar erros de ponto flutuante. Toda a regra de negócio (frete, cupom, desconto Pix, parcelas, criação do pedido) fica em funções puras com testes.
 - **Carrinho guarda só referências** (`productId`, cor, tamanho e quantidade). Nome e preço vêm sempre do catálogo, então um `localStorage` antigo nunca mostra preço desatualizado.
 - **Hidratação segura dos stores persistidos.** Os stores Zustand usam `skipHydration` e são reidratados após a montagem. O HTML estático e a primeira renderização no cliente ficam idênticos, sem erros de hidratação, e `useSyncExternalStore` indica quando os dados locais já estão disponíveis.
@@ -101,11 +101,16 @@ npm run lint         # ESLint
 npm run typecheck    # gera os tipos de rotas e roda tsc --noEmit
 npm test             # Vitest (unitários e de componentes)
 npm run build        # exportação estática em ./out
+npm run build:cf     # mesmo build de produção usado no deploy da Cloudflare
 npm start            # serve ./out em http://localhost:3000/next-ecommerce-store
 npm run format       # Prettier
 ```
 
-> Observação: no Windows, o Next 16 exporta os arquivos de prefetch de segmentos com `\` no caminho, o que gera 404 inofensivos de prefetch no preview local. O deploy é feito pelo GitHub Actions em Linux, onde os arquivos saem corretos.
+> Observação: no Windows, o Next 16 exporta os arquivos de prefetch de segmentos com `\` no caminho, o que gera 404 inofensivos de prefetch no preview local. O build de deploy roda em Linux, onde os arquivos saem corretos.
+
+## Deploy
+
+Publicado na Cloudflare (Workers static assets) em https://portfolio.brunoisaac.dev/next-ecommerce-store/ pelo pipeline do repositório [portfolio](https://github.com/BrunoICosta/portfolio), que roda `npm run build:cf` e publica a pasta `out/` sob `/next-ecommerce-store/`. URLs desconhecidas recebem o `404.html` exportado pelo Next. O GitHub Actions deste repositório roda apenas a CI (lint, formatação, tipos, testes e build).
 
 ## Estrutura de pastas
 

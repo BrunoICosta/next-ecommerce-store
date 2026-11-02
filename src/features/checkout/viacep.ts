@@ -24,7 +24,7 @@ export class CepNotFoundError extends Error {
 
 /**
  * Looks up an address on ViaCEP (public, keyless, CORS-enabled), which works
- * from the browser even on a static host such as GitHub Pages.
+ * from the browser even on a fully static host.
  */
 export async function fetchAddressByCep(
   cep: string,

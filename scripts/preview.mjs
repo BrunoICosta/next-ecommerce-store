@@ -1,4 +1,4 @@
-// Minimal static server that mimics GitHub Pages: serves ./out under the
+// Minimal static server that mimics the static host: serves ./out under the
 // configured basePath, resolves "dir/" to "dir/index.html" and falls back to 404.html.
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";

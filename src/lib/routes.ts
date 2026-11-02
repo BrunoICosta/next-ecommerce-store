@@ -3,7 +3,7 @@ import type { Locale } from "@/i18n/config";
 /**
  * Centralized internal URLs, prefixed with the locale segment. Paths end with
  * "/" because the static export uses `trailingSlash: true` (each route is a
- * folder with an index.html on Pages). Path segments stay the same in every
+ * folder with an index.html on the static host). Path segments stay the same in every
  * language; only the prefix changes (/pt-BR/produtos/, /en/produtos/).
  */
 export function createRoutes(locale: Locale) {
