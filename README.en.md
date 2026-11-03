@@ -1,4 +1,4 @@
-# Trama — Next.js e-commerce
+# Trama | Next.js e-commerce
 
 [Português](README.md) · **English**
 
@@ -56,6 +56,6 @@ See the [Portuguese README](README.md) for the full architecture notes, how this
 
 ## Author
 
-**Bruno Vinicius Isaac Costa** — https://github.com/BrunoICosta
+**Bruno Vinicius Isaac Costa** · https://github.com/BrunoICosta
 
 [MIT](LICENSE) license.

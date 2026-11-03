@@ -1,4 +1,4 @@
-# Trama — e-commerce com Next.js
+# Trama | e-commerce com Next.js
 
 **Português** · [English](README.en.md)
 
@@ -155,6 +155,6 @@ src/
 
 ## Autor
 
-**Bruno Vinicius Isaac Costa** — https://github.com/BrunoICosta
+**Bruno Vinicius Isaac Costa** · https://github.com/BrunoICosta
 
 Licença [MIT](LICENSE).

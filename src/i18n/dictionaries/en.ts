@@ -8,7 +8,7 @@ const plural = (count: number, one: string, many: string) =>
 
 export const en: Dictionary = {
   meta: {
-    title: "Trama — clothing, sneakers and accessories",
+    title: "Trama | clothing, sneakers and accessories",
     description:
       "Casual fashion store with t-shirts, sweatshirts, pants, sneakers and accessories. Free shipping over R$ 299 and easy returns within 30 days.",
     keywords: ["online store", "casual fashion", "t-shirts", "sneakers", "sweatshirts", "Next.js"],
@@ -39,7 +39,7 @@ export const en: Dictionary = {
   header: {
     announcement: "Free shipping over R$ 299 · Use code",
     announcementSuffix: "on your first order",
-    homeLink: "Trama — home page",
+    homeLink: "Trama, home page",
     categoriesNav: "Categories",
     mainNav: "Main menu",
     openMenu: "Open menu",

@@ -12,7 +12,7 @@ const plural = (count: number, one: string, many: string) =>
  */
 export const ptBR = {
   meta: {
-    title: "Trama — roupas, tênis e acessórios",
+    title: "Trama | roupas, tênis e acessórios",
     description:
       "Loja de moda casual com camisetas, moletons, calças, tênis e acessórios. Frete grátis acima de R$ 299 e troca fácil em até 30 dias.",
     keywords: ["loja online", "moda casual", "camisetas", "tênis", "moletons", "Next.js"],
@@ -43,7 +43,7 @@ export const ptBR = {
   header: {
     announcement: "Frete grátis acima de R$ 299 · Cupom",
     announcementSuffix: "na primeira compra",
-    homeLink: "Trama — página inicial",
+    homeLink: "Trama, página inicial",
     categoriesNav: "Categorias",
     mainNav: "Menu principal",
     openMenu: "Abrir menu",

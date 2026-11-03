@@ -36,7 +36,7 @@ export async function generateMetadata({
   if (!product) return {};
 
   const url = absoluteUrl(routes.product(product.slug));
-  const title = `${product.name} — ${formatPrice(product.price, locale)}`;
+  const title = `${product.name} | ${formatPrice(product.price, locale)}`;
   const image = ogImage(`${url}og.png`, product.name);
   return {
     title: product.name,
