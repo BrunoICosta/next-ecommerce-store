@@ -24,7 +24,10 @@ const PAYMENT_DELAY_MS = 1200;
 
 function CheckoutSkeleton() {
   return (
-    <div className="grid animate-pulse gap-10 lg:grid-cols-[1fr_400px]" aria-hidden>
+    <div
+      className="grid animate-pulse grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_400px]"
+      aria-hidden
+    >
       <div className="h-96 rounded-3xl bg-muted" />
       <div className="h-80 rounded-3xl bg-muted" />
     </div>
@@ -104,7 +107,10 @@ export function CheckoutView() {
   }
 
   return (
-    <div ref={topRef} className="grid scroll-mt-32 items-start gap-10 lg:grid-cols-[1fr_400px]">
+    <div
+      ref={topRef}
+      className="grid scroll-mt-32 grid-cols-[minmax(0,1fr)] items-start gap-10 lg:grid-cols-[minmax(0,1fr)_400px]"
+    >
       <div className="space-y-8">
         <CheckoutStepper current={currentStep} onSelect={goToStep} />
         <div className="rounded-3xl border border-border bg-card p-5 sm:p-8">

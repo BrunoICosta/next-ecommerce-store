@@ -119,7 +119,7 @@ export function OrderConfirmation() {
         </p>
       </header>
 
-      <div className="grid items-start gap-8 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-6">
           <section
             aria-labelledby="pagamento"

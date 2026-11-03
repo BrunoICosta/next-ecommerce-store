@@ -52,7 +52,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-2 lg:gap-16">
       <ProductGallery name={product.name} category={product.category} color={color} />
 
       <div className="flex flex-col gap-6">

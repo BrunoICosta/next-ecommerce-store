@@ -36,7 +36,7 @@ export function CatalogView() {
   );
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
       <aside className="hidden lg:block" aria-label={t.filters}>
         {panel}
       </aside>

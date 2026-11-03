@@ -109,7 +109,7 @@ export function PaymentStep({ amountFor, onMethodChange, onBack, onSubmit }: Pay
                 </span>
               )
             }
-            className="pr-24"
+            className={brand !== "unknown" ? "pr-24" : undefined}
             {...register("cardNumber", {
               setValueAs: maskCardNumber,
               onChange: (event) => {

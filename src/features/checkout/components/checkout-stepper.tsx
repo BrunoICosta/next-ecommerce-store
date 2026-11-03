@@ -44,7 +44,13 @@ export function CheckoutStepper({ current, onSelect }: CheckoutStepperProps) {
                 >
                   {done ? <Check className="size-4" aria-hidden /> : step}
                 </span>
-                <span className={cn(!active && !done && "text-muted-foreground")}>
+                {/* On small screens only the current step shows its label (others stay for screen readers). */}
+                <span
+                  className={cn(
+                    !active && !done && "text-muted-foreground",
+                    !active && "sr-only sm:not-sr-only",
+                  )}
+                >
                   {label}
                   {done && <span className="sr-only">{t.stepDone}</span>}
                 </span>

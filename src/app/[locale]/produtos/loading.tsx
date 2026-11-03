@@ -7,7 +7,7 @@ export default function ProductsLoading() {
       <LoadingStatus />
       <Skeleton className="h-10 w-48" />
       <Skeleton className="mt-3 mb-8 h-5 w-96 max-w-full" />
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
         <div className="hidden space-y-4 lg:block">
           {[0, 1, 2, 3].map((index) => (
             <Skeleton key={index} className="h-32" />

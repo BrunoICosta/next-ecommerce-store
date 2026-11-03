@@ -16,7 +16,10 @@ import { ShippingCalculator } from "./shipping-calculator";
 
 function CartSkeleton() {
   return (
-    <div className="grid animate-pulse gap-10 lg:grid-cols-[1fr_380px]" aria-hidden>
+    <div
+      className="grid animate-pulse grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_380px]"
+      aria-hidden
+    >
       <div className="space-y-4">
         {[0, 1].map((index) => (
           <div key={index} className="h-36 rounded-2xl bg-muted" />
@@ -54,7 +57,7 @@ export function CartView() {
   const merchandiseTotal = totals.subtotal - totals.discount;
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[1fr_380px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
       <section aria-labelledby="itens-carrinho">
         <div className="flex items-center justify-between">
           <h2 id="itens-carrinho" className="text-lg font-semibold">
